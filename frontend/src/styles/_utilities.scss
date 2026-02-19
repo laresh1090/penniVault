@@ -1,0 +1,22 @@
+.text-brand { color: $pv-primary !important; }
+.text-brand-dark { color: $pv-primary-dark !important; }
+.bg-brand { background-color: $pv-primary !important; }
+.bg-brand-light { background-color: $pv-primary-bg !important; }
+
+.pv-text-logo {
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 800;
+  font-size: 1.75rem;
+  color: $pv-dark;
+  margin: 0;
+  line-height: 1;
+
+  span {
+    color: $pv-primary;
+  }
+
+  &--white {
+    color: #FFFFFF;
+    span { color: $pv-primary; }
+  }
+}

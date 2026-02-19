@@ -1,0 +1,72 @@
+// Bootstrap CSS-level overrides
+// These override compiled Bootstrap styles using specificity.
+// Bootstrap's compiled CSS is loaded before this file via layout.tsx.
+
+// Primary button styling
+.btn-primary {
+  background-color: $pv-primary;
+  border-color: $pv-primary;
+
+  &:hover,
+  &:focus {
+    background-color: $pv-primary-dark;
+    border-color: $pv-primary-dark;
+  }
+
+  &:active {
+    background-color: $pv-primary-dark;
+    border-color: $pv-primary-dark;
+  }
+}
+
+.btn-outline-primary {
+  color: $pv-primary;
+  border-color: $pv-primary;
+
+  &:hover,
+  &:focus {
+    background-color: $pv-primary;
+    border-color: $pv-primary;
+  }
+}
+
+.btn {
+  @include transition-smooth;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+// Card styling
+.card {
+  @include card-shadow;
+  border-color: $pv-border;
+  border-radius: 12px;
+}
+
+// Form input styling
+.form-control,
+.form-select {
+  border-color: $pv-border;
+  border-radius: 8px;
+
+  &:focus {
+    border-color: $pv-primary;
+    box-shadow: 0 0 0 3px rgba($pv-primary, 0.15);
+  }
+}
+
+// Link styling
+a {
+  color: $pv-primary;
+
+  &:hover {
+    color: $pv-primary-dark;
+  }
+}
+
+// Headings font
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--font-poppins), var(--font-inter), system-ui, sans-serif;
+  font-weight: 700;
+}

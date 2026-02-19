@@ -1,0 +1,29 @@
+// PenniVault Global Styles
+// Bootstrap compiled CSS is imported in layout.tsx (before this file)
+// so all Bootstrap classes are already available. Our SCSS layers on top.
+
+// 1. Variables (brand colours + CSS custom property overrides)
+@import '../styles/variables';
+
+// 2. Mixins (needed by overrides and base)
+@import '../styles/mixins';
+
+// 3. Bootstrap overrides (CSS-level overrides on top of compiled Bootstrap)
+@import '../styles/bootstrap-overrides';
+
+// 4. Base
+@import '../styles/base';
+
+// 5. Utilities
+@import '../styles/utilities';
+
+// 6. Animations
+@import '../styles/animations';
+
+// 7. Page-specific
+@import '../styles/marketing';
+@import '../styles/dashboard';
+@import '../styles/auth';
+
+// 8. Font Awesome
+@import '@fortawesome/fontawesome-svg-core/styles.css';

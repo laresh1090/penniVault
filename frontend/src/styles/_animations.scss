@@ -1,0 +1,33 @@
+@keyframes pv-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pv-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pv-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes pv-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.pv-animate-fadeInUp {
+  animation: pv-fadeInUp 0.5s ease forwards;
+}
+
+.pv-animate-pulse {
+  animation: pv-pulse 2s ease-in-out infinite;
+}

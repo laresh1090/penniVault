@@ -1,0 +1,68 @@
+// PenniVault Brand Variables
+// Sass variables for use in our own SCSS partials
+
+$pv-primary: #EB5310;
+$pv-primary-light: #FF6B2C;
+$pv-primary-dark: #C74410;
+$pv-primary-bg: #FFF7ED;
+
+$pv-dark: #1E252F;
+$pv-text: #334155;
+$pv-text-light: #64748B;
+$pv-text-muted: #94A3B8;
+
+$pv-bg: #F8FAFC;
+$pv-bg-alt: #F1F5F9;
+$pv-border: #E2E8F0;
+$pv-border-light: #F1F5F9;
+
+$pv-success: #059669;
+$pv-success-bg: #ECFDF5;
+$pv-warning: #D97706;
+$pv-warning-bg: #FFFBEB;
+$pv-danger: #DC2626;
+$pv-danger-bg: #FEF2F2;
+$pv-info: #0EA5E9;
+$pv-info-bg: #F0F9FF;
+
+// CSS Custom Property overrides for Bootstrap 5.3+
+// These override Bootstrap's compiled --bs-* variables at the :root level
+:root {
+  // Theme colours
+  --bs-primary: #{$pv-primary};
+  --bs-primary-rgb: 235, 83, 16;
+  --bs-secondary: #{$pv-dark};
+  --bs-secondary-rgb: 30, 37, 47;
+  --bs-success: #{$pv-success};
+  --bs-success-rgb: 5, 150, 105;
+  --bs-warning: #{$pv-warning};
+  --bs-warning-rgb: 217, 119, 6;
+  --bs-danger: #{$pv-danger};
+  --bs-danger-rgb: 220, 38, 38;
+  --bs-info: #{$pv-info};
+  --bs-info-rgb: 14, 165, 233;
+  --bs-light: #{$pv-bg};
+  --bs-light-rgb: 248, 250, 252;
+  --bs-dark: #{$pv-dark};
+  --bs-dark-rgb: 30, 37, 47;
+
+  // Body
+  --bs-body-color: #{$pv-text};
+  --bs-body-color-rgb: 51, 65, 81;
+  --bs-body-bg: #FFFFFF;
+  --bs-body-bg-rgb: 255, 255, 255;
+  --bs-body-font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  // Links
+  --bs-link-color: #{$pv-primary};
+  --bs-link-color-rgb: 235, 83, 16;
+  --bs-link-hover-color: #{$pv-primary-dark};
+  --bs-link-hover-color-rgb: 199, 68, 16;
+
+  // Border
+  --bs-border-color: #{$pv-border};
+  --bs-border-radius: 8px;
+  --bs-border-radius-sm: 6px;
+  --bs-border-radius-lg: 12px;
+  --bs-border-radius-xl: 16px;
+}

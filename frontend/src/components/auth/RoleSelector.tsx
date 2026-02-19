@@ -1,54 +1,57 @@
 "use client";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faStore, faUserTie } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faBuilding } from "@fortawesome/free-solid-svg-icons";
 import { cn } from "@/lib/utils";
 
 interface RoleSelectorProps {
   value?: string;
   onChange?: (role: string) => void;
+  error?: string;
   className?: string;
 }
 
 const roles = [
   {
-    value: "user",
+    id: "user",
     icon: faUser,
-    title: "Individual",
-    description: "Save towards your dream assets",
+    title: "Save & Invest",
+    description: "I want to save towards goals like property, cars, or general savings.",
   },
   {
-    value: "vendor",
-    icon: faStore,
-    title: "Vendor",
-    description: "List and sell assets on PenniVault",
+    id: "vendor",
+    icon: faBuilding,
+    title: "Sell on PenniVault",
+    description: "I want to list property, vehicles, or other products for buyers.",
   },
-  {
-    value: "agent",
-    icon: faUserTie,
-    title: "Agent",
-    description: "Manage referrals and earn commissions",
-  },
-] as const;
+];
 
-export default function RoleSelector({
-  value,
-  onChange,
-  className,
-}: RoleSelectorProps) {
+export default function RoleSelector({ value, onChange, error, className }: RoleSelectorProps) {
   return (
-    <div className={cn("pv-role-selector", className)}>
+    <div className={cn("pv-role-selector", className)} style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
       {roles.map((role) => (
         <div
-          key={role.value}
-          className={cn("role-option", value === role.value && "selected")}
-          onClick={() => onChange?.(role.value)}
+          key={role.id}
+          className={cn("role-option", value === role.id && "selected")}
+          onClick={() => onChange?.(role.id)}
+          role="radio"
+          aria-checked={value === role.id}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onChange?.(role.id);
+            }
+          }}
         >
-          <FontAwesomeIcon icon={role.icon} />
-          <strong>{role.title}</strong>
-          <span>{role.description}</span>
+          <div className="role-icon">
+            <FontAwesomeIcon icon={role.icon} />
+          </div>
+          <div className="role-title">{role.title}</div>
+          <div className="role-desc">{role.description}</div>
         </div>
       ))}
+      {error && <div className="pv-form-error" style={{ gridColumn: "1 / -1", marginTop: "8px" }}>{error}</div>}
     </div>
   );
 }

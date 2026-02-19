@@ -66,6 +66,7 @@ import {
   faBullhorn,
   faLayerGroup,
   faQuestionCircle,
+  faBinoculars,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faFacebook,
@@ -94,7 +95,7 @@ library.add(
   faTachometerAlt, faSearch, faSortUp, faSortDown,
   faXmark, faChevronLeft, faChevronRight, faChevronDown,
   faLocationDot, faMapMarkerAlt, faCar, faHouseChimney, faStar,
-  faSignOutAlt, faBullhorn, faLayerGroup, faQuestionCircle,
+  faSignOutAlt, faBullhorn, faLayerGroup, faQuestionCircle, faBinoculars,
   faFacebook, faFacebookF, faTwitter, faInstagram,
   faGoogle, faApple, faLinkedinIn,
 );

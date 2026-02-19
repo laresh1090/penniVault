@@ -17,13 +17,17 @@
 // 5. Utilities
 @import '../styles/utilities';
 
-// 6. Animations
+// 6. Animations & Skeletons
 @import '../styles/animations';
+@import '../styles/skeletons';
 
 // 7. Page-specific
 @import '../styles/marketing';
 @import '../styles/dashboard';
 @import '../styles/auth';
 
-// 8. Font Awesome
+// 8. Responsive
+@import '../styles/responsive';
+
+// 9. Font Awesome
 @import '@fortawesome/fontawesome-svg-core/styles.css';

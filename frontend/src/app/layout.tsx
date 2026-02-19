@@ -5,6 +5,8 @@ import "./globals.scss";
 import "@/lib/fontawesome";
 import BootstrapClient from "@/components/providers/BootstrapClient";
 import AppProviders from "@/components/providers/AppProviders";
+import MotionProvider from "@/app/providers/motion-provider";
+import { ToastProvider } from "@/contexts/ToastContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,8 +39,12 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <body>
         <AppProviders>
-          <BootstrapClient />
-          {children}
+          <MotionProvider>
+            <ToastProvider>
+              <BootstrapClient />
+              {children}
+            </ToastProvider>
+          </MotionProvider>
         </AppProviders>
       </body>
     </html>

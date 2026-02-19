@@ -6,3 +6,4 @@ export * from "./savings";
 export * from "./asset";
 export * from "./notification";
 export * from "./dashboard";
+export * from "./marketing";

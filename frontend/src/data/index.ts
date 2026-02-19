@@ -4,3 +4,4 @@ export { mockTransactions } from "./transactions";
 export { mockSavingsPlans, mockGroupSavings } from "./savings";
 export { mockAssets } from "./assets";
 export { mockNotifications } from "./notifications";
+export * from "./dashboard";

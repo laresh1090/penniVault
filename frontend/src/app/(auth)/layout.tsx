@@ -1,15 +1,30 @@
-import type { ReactNode } from "react";
+import type { Metadata } from "next";
+import BrandPanel from "@/components/auth/BrandPanel";
 
-export default function AuthLayout({ children }: { children: ReactNode }) {
+export const metadata: Metadata = {
+  title: "Authentication",
+};
+
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ background: "#F8FAFC" }}>
-      <div className="container py-5">
-        <div className="text-center mb-4">
-          <a href="/" className="text-decoration-none">
-            <h3 className="pv-text-logo">Penni<span>Vault</span></h3>
-          </a>
+    <div className="pv-auth-page">
+      <BrandPanel />
+      <div className="pv-auth-mobile-brand">
+        <div className="mobile-brand-logo">
+          Penni<span style={{ color: "#FAA019" }}>Vault</span>
         </div>
-        {children}
+        <div className="mobile-brand-tagline">
+          Your money. Your goals. Your vault.
+        </div>
+      </div>
+      <div className="pv-auth-form-panel">
+        <div className="pv-auth-form-container">
+          {children}
+        </div>
       </div>
     </div>
   );

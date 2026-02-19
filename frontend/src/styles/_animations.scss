@@ -1,3 +1,4 @@
+// Existing keyframes
 @keyframes pv-fadeInUp {
   from {
     opacity: 0;
@@ -30,4 +31,63 @@
 
 .pv-animate-pulse {
   animation: pv-pulse 2s ease-in-out infinite;
+}
+
+// New keyframes
+@keyframes pv-fadeSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pv-fadeSlideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pv-fadeSlideLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pv-fadeSlideRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pv-scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pv-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pv-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+// Animation classes
+.animate-fade-up { animation: pv-fadeSlideUp 0.5s ease forwards; }
+.animate-fade-down { animation: pv-fadeSlideDown 0.5s ease forwards; }
+.animate-fade-left { animation: pv-fadeSlideLeft 0.5s ease forwards; }
+.animate-fade-right { animation: pv-fadeSlideRight 0.5s ease forwards; }
+.animate-scale-in { animation: pv-scaleIn 0.4s ease forwards; }
+.animate-float { animation: pv-float 3s ease-in-out infinite; }
+
+// Delay utilities
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+// Skeleton loading
+.skeleton {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: pv-shimmer 1.5s infinite;
+  border-radius: var(--pv-radius);
 }

@@ -65,4 +65,66 @@ $pv-info-bg: #F0F9FF;
   --bs-border-radius-sm: 6px;
   --bs-border-radius-lg: 12px;
   --bs-border-radius-xl: 16px;
+
+  // ================================
+  // PenniVault Custom Properties
+  // ================================
+
+  // Brand
+  --pv-primary: #EB5310;
+  --pv-primary-rgb: 235, 83, 16;
+  --pv-secondary: #FAA019;
+  --pv-accent: #F97316;
+  --pv-dark: #1E252F;
+  --pv-text: #334155;
+  --pv-text-muted: #64748B;
+  --pv-bg: #F8FAFC;
+  --pv-bg-alt: #F1F5F9;
+  --pv-border: #E2E8F0;
+  --pv-white: #FFFFFF;
+
+  // Layout
+  --pv-sidebar-width: 280px;
+  --pv-sidebar-collapsed-width: 70px;
+  --pv-topbar-height: 65px;
+  --pv-header-height: 80px;
+
+  // Border radius
+  --pv-radius-sm: 6px;
+  --pv-radius: 8px;
+  --pv-radius-md: 10px;
+  --pv-radius-lg: 12px;
+  --pv-radius-xl: 16px;
+
+  // Shadows
+  --pv-shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --pv-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --pv-shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --pv-shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+
+  // Status colors
+  --pv-status-active: #059669;
+  --pv-status-active-bg: #ECFDF5;
+  --pv-status-pending: #D97706;
+  --pv-status-pending-bg: #FFF8EB;
+  --pv-status-completed: #2563EB;
+  --pv-status-completed-bg: #EFF6FF;
+  --pv-status-overdue: #DC2626;
+  --pv-status-overdue-bg: #FEF2F2;
+  --pv-status-paused: #64748B;
+  --pv-status-paused-bg: #F1F5F9;
+
+  // Wallet variants
+  --pv-wallet-real: #EB5310;
+  --pv-wallet-real-bg: #FFF3EE;
+  --pv-wallet-virtual: #FAA019;
+  --pv-wallet-virtual-bg: #FFF8EB;
+  --pv-wallet-savings: #3B82F6;
+  --pv-wallet-savings-bg: #EFF6FF;
+  --pv-wallet-monthly: #10B981;
+  --pv-wallet-monthly-bg: #ECFDF5;
+
+  // Transitions
+  --pv-transition: all 0.3s ease;
+  --pv-transition-fast: all 0.15s ease;
 }

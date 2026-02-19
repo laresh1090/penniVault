@@ -2,71 +2,157 @@
 // These override compiled Bootstrap styles using specificity.
 // Bootstrap's compiled CSS is loaded before this file via layout.tsx.
 
-// Primary button styling
-.btn-primary {
-  background-color: $pv-primary;
-  border-color: $pv-primary;
+// Buttons
+.btn {
+  font-weight: 500;
+  border-radius: var(--pv-radius);
+  padding: 10px 20px;
+  transition: var(--pv-transition);
+  font-size: 0.9375rem;
 
-  &:hover,
   &:focus {
-    background-color: $pv-primary-dark;
-    border-color: $pv-primary-dark;
+    box-shadow: 0 0 0 3px rgba(var(--pv-primary-rgb), 0.25);
+  }
+}
+
+.btn-primary {
+  background-color: var(--pv-primary);
+  border-color: var(--pv-primary);
+
+  &:hover, &:focus {
+    background-color: darken(#EB5310, 8%);
+    border-color: darken(#EB5310, 8%);
   }
 
   &:active {
-    background-color: $pv-primary-dark;
-    border-color: $pv-primary-dark;
+    background-color: darken(#EB5310, 12%);
   }
 }
 
 .btn-outline-primary {
-  color: $pv-primary;
-  border-color: $pv-primary;
+  color: var(--pv-primary);
+  border-color: var(--pv-primary);
 
-  &:hover,
-  &:focus {
-    background-color: $pv-primary;
-    border-color: $pv-primary;
+  &:hover, &:focus {
+    background-color: var(--pv-primary);
+    border-color: var(--pv-primary);
+    color: #fff;
   }
 }
 
-.btn {
-  @include transition-smooth;
-  font-weight: 600;
-  border-radius: 8px;
+.btn-lg {
+  padding: 12px 28px;
+  font-size: 1rem;
+  border-radius: var(--pv-radius-md);
 }
 
-// Card styling
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.8125rem;
+}
+
+// Cards
 .card {
-  @include card-shadow;
-  border-color: $pv-border;
-  border-radius: 12px;
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-lg);
+  box-shadow: var(--pv-shadow-sm);
+  transition: var(--pv-transition);
 }
 
-// Form input styling
-.form-control,
-.form-select {
-  border-color: $pv-border;
-  border-radius: 8px;
+// Forms
+.form-control, .form-select {
+  height: 50px;
+  border-radius: var(--pv-radius-md);
+  border-color: var(--pv-border);
+  font-size: 0.9375rem;
+  padding: 10px 16px;
 
   &:focus {
-    border-color: $pv-primary;
-    box-shadow: 0 0 0 3px rgba($pv-primary, 0.15);
+    border-color: var(--pv-primary);
+    box-shadow: 0 0 0 3px rgba(var(--pv-primary-rgb), 0.15);
+  }
+
+  &::placeholder {
+    color: #94A3B8;
   }
 }
 
-// Link styling
-a {
-  color: $pv-primary;
+.form-label {
+  font-weight: 500;
+  color: var(--pv-text);
+  margin-bottom: 6px;
+  font-size: 0.875rem;
+}
+
+// Badges
+.badge {
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+}
+
+// Dropdowns
+.dropdown-menu {
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius);
+  box-shadow: var(--pv-shadow-md);
+  padding: 8px;
+}
+
+.dropdown-item {
+  border-radius: var(--pv-radius-sm);
+  padding: 8px 12px;
+  font-size: 0.875rem;
 
   &:hover {
-    color: $pv-primary-dark;
+    background-color: var(--pv-bg);
   }
 }
 
-// Headings font
-h1, h2, h3, h4, h5, h6,
-.h1, .h2, .h3, .h4, .h5, .h6 {
-  font-family: var(--font-poppins), var(--font-inter), system-ui, sans-serif;
-  font-weight: 700;
+// Tables
+.table {
+  font-size: 0.875rem;
+
+  th {
+    font-weight: 600;
+    color: var(--pv-text-muted);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--pv-border);
+    padding: 12px 16px;
+  }
+
+  td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #F1F5F9;
+    color: var(--pv-text);
+  }
+
+  tbody tr:hover {
+    background-color: #FAFBFC;
+  }
+}
+
+// Modal
+.modal-content {
+  border: none;
+  border-radius: var(--pv-radius-xl);
+  box-shadow: var(--pv-shadow-lg);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--pv-border);
+  padding: 20px 24px;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--pv-border);
+  padding: 16px 24px;
 }

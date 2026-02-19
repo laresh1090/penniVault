@@ -3,6 +3,8 @@ import { Inter, Poppins } from "next/font/google";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.scss";
 import "@/lib/fontawesome";
+import BootstrapClient from "@/components/providers/BootstrapClient";
+import AppProviders from "@/components/providers/AppProviders";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,7 +35,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
-      <body>{children}</body>
+      <body>
+        <AppProviders>
+          <BootstrapClient />
+          {children}
+        </AppProviders>
+      </body>
     </html>
   );
 }

@@ -1,26 +1,51 @@
-import DashCardSkeleton from "@/components/skeletons/DashCardSkeleton";
-import ChartSkeleton from "@/components/skeletons/ChartSkeleton";
-import DataTableSkeleton from "@/components/skeletons/DataTableSkeleton";
-
 export default function DashboardLoading() {
   return (
     <div aria-label="Loading dashboard">
+      {/* Balance card skeleton */}
+      <div
+        className="skeleton-bone"
+        style={{ height: 200, borderRadius: 16, marginBottom: 24 }}
+      />
+
+      {/* Section title skeleton */}
+      <div
+        className="skeleton-bone"
+        style={{ width: 180, height: 20, borderRadius: 6, marginBottom: 16 }}
+      />
+
+      {/* Product grid skeleton (2x2) */}
       <div className="row g-3 mb-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="col-sm-6 col-lg-3">
-            <DashCardSkeleton />
+          <div key={i} className="col-6">
+            <div
+              className="skeleton-bone"
+              style={{ height: 150, borderRadius: 14 }}
+            />
           </div>
         ))}
       </div>
-      <div className="row g-4 mb-4">
-        <div className="col-lg-8">
-          <ChartSkeleton />
-        </div>
-        <div className="col-lg-4">
-          <ChartSkeleton height={180} />
-        </div>
+
+      {/* Investments section skeleton */}
+      <div
+        className="skeleton-bone"
+        style={{ height: 20, width: 160, borderRadius: 6, marginBottom: 16 }}
+      />
+      <div className="row g-3 mb-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="col-md-6 col-lg-4">
+            <div
+              className="skeleton-bone"
+              style={{ height: 360, borderRadius: 14 }}
+            />
+          </div>
+        ))}
       </div>
-      <DataTableSkeleton rows={5} columns={5} />
+
+      {/* Transactions section skeleton */}
+      <div
+        className="skeleton-bone"
+        style={{ borderRadius: 12, padding: 24, height: 320 }}
+      />
     </div>
   );
 }

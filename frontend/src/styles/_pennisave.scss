@@ -1,0 +1,1060 @@
+// ============================================
+// PENNISAVE - Dedicated Styles
+// Accent: #3B82F6 (PenniSave blue)
+// Dark cards: #1E252F (matches product-card, balance-hero-card)
+// ============================================
+
+// --- Page Header ---
+.pennisave-page-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1E252F;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pennisave-title-icon {
+  color: #3B82F6;
+  font-size: 22px;
+}
+
+.pennisave-page-subtitle {
+  font-size: 13px;
+  color: #64748B;
+  margin: 4px 0 0;
+}
+
+// --- Filter Pills ---
+.pennisave-filter-pill {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid #E2E8F0;
+  background: transparent;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #3B82F6;
+    color: #3B82F6;
+  }
+
+  &.active {
+    background: #3B82F6;
+    border-color: #3B82F6;
+    color: #FFFFFF;
+  }
+}
+
+// --- Summary Card (dark navy hero) ---
+.pennisave-summary-card {
+  background: linear-gradient(135deg, #1E252F 0%, #2D3748 100%);
+  border-radius: 16px;
+  padding: 28px;
+  color: #FFFFFF;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pennisave-summary-decoration {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.08);
+  pointer-events: none;
+}
+
+.pennisave-summary-left {
+  padding-right: 20px;
+}
+
+.pennisave-summary-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pennisave-balance-toggle {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  margin-left: 4px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #FFFFFF;
+  }
+}
+
+.pennisave-summary-amount {
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.pennisave-summary-plans {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.pennisave-summary-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  justify-content: center;
+  padding-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pennisave-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pennisave-stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+
+  &.interest {
+    background: rgba(5, 150, 105, 0.15);
+    color: #34D399;
+  }
+
+  &.autosave {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60A5FA;
+  }
+}
+
+.pennisave-stat-label {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pennisave-stat-value {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+// --- Plan Card ---
+.pennisave-plan-card {
+  background: var(--card-bg, #FFFFFF);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border: 1px solid #F1F5F9;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, border-color 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-color: #E2E8F0;
+  }
+}
+
+.pennisave-plan-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.pennisave-plan-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E252F;
+  margin: 0 0 4px;
+}
+
+.pennisave-plan-desc {
+  font-size: 13px;
+  color: #64748B;
+  margin: 0;
+  line-height: 1.4;
+}
+
+// --- Balance Section (principal/interest separated) ---
+.pennisave-plan-balance-section {
+  background: #F8FAFC;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pennisave-plan-principal,
+.pennisave-plan-interest,
+.pennisave-plan-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pennisave-plan-total {
+  padding-top: 8px;
+  border-top: 1px solid #E2E8F0;
+}
+
+.pennisave-balance-label {
+  font-size: 12px;
+  color: #64748B;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.pennisave-balance-amount {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1E252F;
+
+  &.interest {
+    color: #059669;
+  }
+
+  &.total {
+    font-size: 18px;
+    font-weight: 800;
+  }
+}
+
+// --- Progress Section ---
+.pennisave-plan-progress-section {
+  margin-bottom: 14px;
+}
+
+.pennisave-progress-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
+}
+
+// --- Info Tags ---
+.pennisave-plan-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.pennisave-info-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #EFF6FF;
+  color: #3B82F6;
+
+  &.penalty {
+    background: #FFF8EB;
+    color: #D97706;
+  }
+
+  &.free {
+    background: #ECFDF5;
+    color: #059669;
+  }
+}
+
+// --- Action Buttons ---
+.pennisave-plan-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.pennisave-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+
+  &.quicksave {
+    background: #3B82F6;
+    color: #FFFFFF;
+
+    &:hover {
+      background: #2563EB;
+    }
+  }
+
+  &.withdraw {
+    background: #F1F5F9;
+    color: #334155;
+
+    &:hover {
+      background: #E2E8F0;
+    }
+  }
+
+  &.details {
+    background: transparent;
+    color: #3B82F6;
+    border: 1px solid #E2E8F0;
+    margin-left: auto;
+
+    &:hover {
+      background: #EFF6FF;
+      border-color: #3B82F6;
+    }
+  }
+}
+
+// --- Modal Shared Styles ---
+.pennisave-modal {
+  border-radius: 16px !important;
+  border: none !important;
+  overflow: hidden;
+}
+
+.pennisave-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #F1F5F9;
+
+  &.compact {
+    padding: 16px 24px;
+  }
+}
+
+.pennisave-modal-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: #EFF6FF;
+  color: #3B82F6;
+
+  &.quicksave {
+    background: #F5F3FF;
+    color: #8B5CF6;
+  }
+
+  &.withdraw {
+    background: #FEF2F2;
+    color: #DC2626;
+  }
+}
+
+.pennisave-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1E252F;
+  margin: 0;
+}
+
+.pennisave-modal-subtitle {
+  font-size: 13px;
+  color: #64748B;
+  margin: 2px 0 0;
+}
+
+.pennisave-modal-close {
+  background: none;
+  border: none;
+  color: #94A3B8;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #1E252F;
+  }
+}
+
+.pennisave-modal-body {
+  padding: 24px;
+}
+
+.pennisave-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #F1F5F9;
+}
+
+// --- Step Indicator Bar ---
+.pennisave-step-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 20px 24px 0;
+  position: relative;
+}
+
+.pennisave-step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  background: #F1F5F9;
+  color: #94A3B8;
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s;
+
+  &.active {
+    background: #3B82F6;
+    color: #FFFFFF;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  }
+
+  &.completed {
+    background: #059669;
+    color: #FFFFFF;
+  }
+}
+
+.pennisave-step-line {
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  top: 36px;
+  height: 3px;
+  background: #F1F5F9;
+  z-index: 1;
+}
+
+.pennisave-step-line-fill {
+  height: 100%;
+  background: #059669;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+// --- Step Content ---
+.pennisave-step-content {
+  // No extra padding -- parent .pennisave-modal-body handles it
+}
+
+.pennisave-step-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E252F;
+  margin: 0 0 4px;
+}
+
+.pennisave-step-desc {
+  font-size: 13px;
+  color: #64748B;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.pennisave-char-count {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  color: #94A3B8;
+  margin-top: 4px;
+}
+
+// --- Amount Input ---
+.pennisave-amount-input-wrapper {
+  position: relative;
+}
+
+.pennisave-amount-prefix {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94A3B8;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.pennisave-amount-input {
+  padding-left: 38px !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+}
+
+.pennisave-amount-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.pennisave-amount-chip {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #E2E8F0;
+  background: transparent;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #3B82F6;
+    color: #3B82F6;
+    background: #EFF6FF;
+  }
+}
+
+// --- Time-to-Target Estimate ---
+.pennisave-time-estimate {
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: #EFF6FF;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #3B82F6;
+  line-height: 1.5;
+}
+
+// --- Frequency Selector ---
+.pennisave-frequency-options {
+  display: flex;
+  gap: 10px;
+}
+
+.pennisave-frequency-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1.5px solid #E2E8F0;
+  background: transparent;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+
+  &:hover {
+    border-color: #3B82F6;
+    color: #3B82F6;
+  }
+
+  &.selected {
+    border-color: #3B82F6;
+    background: #EFF6FF;
+    color: #3B82F6;
+  }
+}
+
+// --- Interest Card ---
+.pennisave-interest-card {
+  background: #F8FAFC;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #F1F5F9;
+}
+
+.pennisave-interest-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E252F;
+  margin: 0 0 4px;
+}
+
+.pennisave-interest-desc {
+  font-size: 13px;
+  color: #64748B;
+  margin: 0;
+}
+
+.pennisave-interest-rate-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #ECFDF5;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #059669;
+}
+
+.pennisave-interest-note {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748B;
+}
+
+// --- Penalty Notice ---
+.pennisave-penalty-notice {
+  background: #FFF8EB;
+  border-radius: 10px;
+  padding: 14px 16px;
+  border-left: 3px solid #D97706;
+}
+
+.pennisave-penalty-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #D97706;
+  margin: 0 0 4px;
+}
+
+.pennisave-penalty-desc {
+  font-size: 13px;
+  color: #92400E;
+  margin: 0;
+  line-height: 1.5;
+}
+
+// --- Funding Source Options ---
+.pennisave-funding-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pennisave-funding-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #E2E8F0;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    border-color: #3B82F6;
+  }
+
+  &.selected {
+    border-color: #3B82F6;
+    background: #EFF6FF;
+  }
+}
+
+.pennisave-funding-icon {
+  font-size: 18px;
+  color: #3B82F6;
+}
+
+.pennisave-funding-bank {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1E252F;
+  margin: 0;
+}
+
+.pennisave-funding-acct {
+  font-size: 12px;
+  color: #64748B;
+}
+
+.pennisave-funding-default {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: #059669;
+  background: #ECFDF5;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+// --- Review Card ---
+.pennisave-review-card {
+  background: #F8FAFC;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pennisave-review-header {
+  background: linear-gradient(135deg, #1E252F, #2D3748);
+  color: #FFFFFF;
+  padding: 20px;
+  text-align: center;
+}
+
+.pennisave-review-icon {
+  font-size: 28px;
+  color: #3B82F6;
+  margin-bottom: 8px;
+}
+
+.pennisave-review-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.pennisave-review-desc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.pennisave-review-rows {
+  padding: 16px 20px;
+}
+
+.pennisave-review-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #E2E8F0;
+  font-size: 14px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.pennisave-review-label {
+  color: #64748B;
+}
+
+.pennisave-review-value {
+  font-weight: 600;
+  color: #1E252F;
+}
+
+// --- Quick Save Confirm ---
+.pennisave-quicksave-balance {
+  font-size: 14px;
+  color: #64748B;
+  margin-bottom: 20px;
+
+  strong {
+    color: #1E252F;
+  }
+}
+
+.pennisave-confirm-summary {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.pennisave-confirm-amount {
+  font-size: 36px;
+  font-weight: 800;
+  color: #059669;
+  margin-bottom: 8px;
+
+  &.withdrawal {
+    color: #DC2626;
+  }
+}
+
+.pennisave-confirm-to {
+  font-size: 14px;
+  color: #64748B;
+  margin-bottom: 16px;
+
+  strong {
+    color: #1E252F;
+  }
+}
+
+.pennisave-confirm-penalty {
+  font-size: 13px;
+  color: #D97706;
+  margin-bottom: 12px;
+}
+
+.pennisave-confirm-from {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #F1F5F9;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #334155;
+}
+
+// --- Withdraw Specific ---
+.pennisave-withdraw-all-btn {
+  display: inline-block;
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: #3B82F6;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+
+  &:hover {
+    color: #2563EB;
+  }
+}
+
+.pennisave-penalty-preview {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #FFF8EB;
+  border-radius: 10px;
+  border-left: 3px solid #D97706;
+  margin-top: 16px;
+
+  &.free {
+    background: #ECFDF5;
+    border-left-color: #059669;
+    color: #059669;
+  }
+}
+
+.pennisave-penalty-preview-icon {
+  color: #D97706;
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pennisave-penalty-preview-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #92400E;
+  margin: 0 0 8px;
+}
+
+.pennisave-penalty-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pennisave-penalty-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #334155;
+
+  &.penalty {
+    color: #DC2626;
+  }
+
+  &.net {
+    font-weight: 700;
+    color: #059669;
+    padding-top: 6px;
+    border-top: 1px dashed #E2E8F0;
+    margin-top: 4px;
+  }
+}
+
+// --- Password Confirmation ---
+.pennisave-password-confirm {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.pennisave-password-lock-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #FEF2F2;
+  color: #DC2626;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.pennisave-password-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E252F;
+  margin: 0 0 8px;
+}
+
+.pennisave-password-desc {
+  font-size: 13px;
+  color: #64748B;
+  margin: 0 0 20px;
+  line-height: 1.5;
+
+  strong {
+    color: #1E252F;
+  }
+}
+
+// --- Empty State ---
+.pennisave-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--card-bg, #FFFFFF);
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border: 1px solid #F1F5F9;
+}
+
+.pennisave-empty-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #EFF6FF;
+  color: #3B82F6;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.pennisave-empty-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1E252F;
+  margin: 0 0 8px;
+}
+
+.pennisave-empty-desc {
+  font-size: 14px;
+  color: #64748B;
+  margin: 0 0 24px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+// --- Responsive ---
+@media (max-width: 767px) {
+  .pennisave-summary-card {
+    padding: 20px;
+  }
+
+  .pennisave-summary-amount {
+    font-size: 28px;
+  }
+
+  .pennisave-summary-stats {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-left: 0;
+    padding-top: 16px;
+    margin-top: 16px;
+    flex-direction: row;
+    gap: 24px;
+  }
+
+  .pennisave-plan-actions {
+    flex-wrap: wrap;
+  }
+
+  .pennisave-action-btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 120px;
+  }
+
+  .pennisave-frequency-options {
+    flex-direction: column;
+  }
+
+  .pennisave-step-bar {
+    gap: 16px;
+  }
+
+  .pennisave-step-dot {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .pennisave-confirm-amount {
+    font-size: 28px;
+  }
+
+  .pennisave-page-title {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 575px) {
+  .pennisave-plan-card {
+    padding: 18px;
+  }
+
+  .pennisave-balance-amount.total {
+    font-size: 16px;
+  }
+
+  .pennisave-plan-info-row {
+    gap: 6px;
+  }
+
+  .pennisave-info-tag {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .pennisave-amount-hints {
+    gap: 6px;
+  }
+
+  .pennisave-amount-chip {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}

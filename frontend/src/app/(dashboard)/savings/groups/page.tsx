@@ -1,220 +1,116 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUsers } from "@fortawesome/free-solid-svg-icons";
-import QuickActionBtn from "@/components/ui/QuickActionBtn";
-import StatusBadge from "@/components/ui/StatusBadge";
-import { mockGroupSavings } from "@/data/savings";
+import { faPeopleGroup } from "@fortawesome/free-solid-svg-icons";
+import { savingsService } from "@/services/savings.service";
+import type { GroupSavings } from "@/types";
 import { formatNaira, formatDate } from "@/lib/formatters";
 
 export default function GroupSavingsPage() {
+  const [groups, setGroups] = useState<GroupSavings[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    savingsService.getUserGroupSavings().then((data) => {
+      setGroups(data);
+      setIsLoading(false);
+    });
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ padding: "60px 0" }}>
+        <div className="spinner-border text-primary" role="status" style={{ color: "#EB5310" }}>
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <>
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>
-          Group Savings
-        </h2>
-        <QuickActionBtn variant="primary" icon={faUsers} href="/savings/groups/join">
-          Join a Group
-        </QuickActionBtn>
+        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Group Savings</h2>
+        <Link href="#" className="quick-action-btn primary" style={{ fontSize: 13, padding: "8px 16px" }}>
+          <FontAwesomeIcon icon={faPeopleGroup} /> Join a Group
+        </Link>
       </div>
 
       {/* Group Cards */}
       <div className="row g-4">
-        {mockGroupSavings.length === 0 ? (
+        {groups.length === 0 ? (
           <div className="col-12">
-            <div
-              className="card p-5 text-center"
-              style={{ borderRadius: 12, border: "1px solid #E2E8F0" }}
-            >
+            <div className="dash-card" style={{ textAlign: "center", padding: "40px 20px" }}>
               <p style={{ color: "#64748B", fontSize: 15, margin: 0 }}>
                 You are not a member of any group savings yet.
               </p>
             </div>
           </div>
         ) : (
-          mockGroupSavings.map((group) => {
+          groups.map((group) => {
             const poolSize = group.contributionAmount * group.filledSlots;
-            const roundProgress = Math.round(
-              (group.currentRound / group.totalRounds) * 100
-            );
-            const statusForBadge = group.status as
-              | "active"
-              | "completed"
-              | "pending"
-              | "paused";
+            const roundProgress = Math.round((group.currentRound / group.totalRounds) * 100);
+            const userMember = group.members.find((m) => m.userId === "usr_001");
+            const midpoint = Math.ceil(group.totalRounds / 2);
 
             return (
               <div key={group.id} className="col-md-6">
-                <div
-                  className="card h-100"
-                  style={{
-                    borderRadius: 12,
-                    border: "1px solid #E2E8F0",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div className="card-body p-4">
-                    {/* Group Name + Status */}
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <h5
-                        style={{
-                          fontSize: 17,
-                          fontWeight: 700,
-                          margin: 0,
-                          color: "#1E293B",
-                        }}
-                      >
-                        {group.name}
-                      </h5>
-                      <StatusBadge status={statusForBadge} />
+                <div className="dash-card h-100">
+                  {/* Group Name + Status */}
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <h5 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{group.name}</h5>
+                      <span style={{ fontSize: 13, color: "#64748B" }}>{group.filledSlots} Members</span>
                     </div>
+                    <span className={`status-badge ${group.status}`}>
+                      {group.status === "active" ? "Active" : group.status.charAt(0).toUpperCase() + group.status.slice(1)}
+                    </span>
+                  </div>
 
-                    {/* Description */}
-                    <p
-                      style={{
-                        fontSize: 13,
-                        color: "#64748B",
-                        marginBottom: 16,
-                        lineHeight: 1.5,
-                      }}
+                  {/* Description */}
+                  <p style={{ fontSize: 13, color: "#64748B", marginBottom: 16, lineHeight: 1.5 }}>
+                    {group.description}
+                  </p>
+
+                  {/* Stats */}
+                  <div className="d-flex justify-content-between mb-2" style={{ fontSize: 13 }}>
+                    <span style={{ color: "#64748B" }}>Total Pool</span>
+                    <strong>{formatNaira(poolSize, false)}</strong>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2" style={{ fontSize: 13 }}>
+                    <span style={{ color: "#64748B" }}>Contribution</span>
+                    <strong>{formatNaira(group.contributionAmount, false)}/{group.frequency}</strong>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2" style={{ fontSize: 13 }}>
+                    <span style={{ color: "#64748B" }}>Next Payout</span>
+                    <strong>{formatDate(group.nextPayoutDate)}</strong>
+                  </div>
+                  <div className="d-flex justify-content-between mb-3" style={{ fontSize: 13 }}>
+                    <span style={{ color: "#64748B" }}>Your Position</span>
+                    <strong style={{ color: "#EB5310" }}>#{userMember?.position ?? "—"}</strong>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="savings-progress mb-2">
+                    <div className="progress-fill" style={{ width: `${roundProgress}%` }}></div>
+                  </div>
+                  <div className="d-flex justify-content-between mb-3" style={{ fontSize: 12, color: "#94A3B8" }}>
+                    <span>Cycle: {group.currentRound} of {group.totalRounds}</span>
+                    <span>Midpoint: Cycle {midpoint}</span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="d-flex gap-2">
+                    <Link
+                      href={`/savings/groups/${group.id}`}
+                      className="quick-action-btn primary"
+                      style={{ fontSize: 13, padding: "8px 16px", flex: 1, justifyContent: "center" }}
                     >
-                      {group.description}
-                    </p>
-
-                    {/* Stats Grid */}
-                    <div
-                      className="d-flex gap-3 flex-wrap mb-3"
-                      style={{ fontSize: 13 }}
-                    >
-                      <div
-                        style={{
-                          flex: "1 1 45%",
-                          padding: "8px 12px",
-                          backgroundColor: "#F8FAFC",
-                          borderRadius: 8,
-                        }}
-                      >
-                        <span style={{ color: "#64748B", display: "block" }}>
-                          Members
-                        </span>
-                        <span
-                          style={{
-                            fontWeight: 700,
-                            color: "#1E293B",
-                            fontSize: 15,
-                          }}
-                        >
-                          {group.filledSlots}/{group.totalSlots}
-                        </span>
-                      </div>
-                      <div
-                        style={{
-                          flex: "1 1 45%",
-                          padding: "8px 12px",
-                          backgroundColor: "#F8FAFC",
-                          borderRadius: 8,
-                        }}
-                      >
-                        <span style={{ color: "#64748B", display: "block" }}>
-                          Pool
-                        </span>
-                        <span
-                          style={{
-                            fontWeight: 700,
-                            color: "#1E293B",
-                            fontSize: 15,
-                          }}
-                        >
-                          {formatNaira(poolSize, false)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Contribution & Round */}
-                    <div
-                      className="d-flex flex-column gap-2 mb-3"
-                      style={{ fontSize: 13, color: "#64748B" }}
-                    >
-                      <div className="d-flex justify-content-between">
-                        <span>Contribution</span>
-                        <span style={{ fontWeight: 600, color: "#334155" }}>
-                          {formatNaira(group.contributionAmount, false)}/
-                          {group.frequency}
-                        </span>
-                      </div>
-                      <div className="d-flex justify-content-between">
-                        <span>Round</span>
-                        <span style={{ fontWeight: 600, color: "#334155" }}>
-                          {group.currentRound} of {group.totalRounds}
-                        </span>
-                      </div>
-                      <div className="d-flex justify-content-between">
-                        <span>Next Payout</span>
-                        <span style={{ fontWeight: 600, color: "#334155" }}>
-                          {formatDate(group.nextPayoutDate)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="mb-3">
-                      <div
-                        style={{
-                          height: 8,
-                          backgroundColor: "#E2E8F0",
-                          borderRadius: 4,
-                          overflow: "hidden",
-                        }}
-                      >
-                        <div
-                          style={{
-                            height: "100%",
-                            width: `${Math.min(roundProgress, 100)}%`,
-                            backgroundColor:
-                              roundProgress >= 100 ? "#22C55E" : "#EB5310",
-                            borderRadius: 4,
-                            transition: "width 0.4s ease",
-                          }}
-                        />
-                      </div>
-                      <div
-                        className="text-end mt-1"
-                        style={{ fontSize: 12, color: "#64748B" }}
-                      >
-                        {roundProgress}% rounds completed
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="d-flex justify-content-between gap-2">
-                      <Link
-                        href={`/savings/groups/${group.id}`}
-                        className="btn btn-sm flex-grow-1"
-                        style={{
-                          backgroundColor: "#EB5310",
-                          color: "#fff",
-                          borderRadius: 8,
-                          fontSize: 13,
-                          fontWeight: 600,
-                        }}
-                      >
-                        View Details
-                      </Link>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-danger"
-                        style={{
-                          borderRadius: 8,
-                          fontSize: 13,
-                          fontWeight: 600,
-                        }}
-                      >
-                        Leave
-                      </button>
-                    </div>
+                      View Details
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -222,6 +118,6 @@ export default function GroupSavingsPage() {
           })
         )}
       </div>
-    </div>
+    </>
   );
 }

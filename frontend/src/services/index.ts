@@ -4,3 +4,8 @@ export { transactionService } from "./transaction.service";
 export { savingsService } from "./savings.service";
 export { assetService } from "./asset.service";
 export { notificationService } from "./notification.service";
+export { paymentService } from "./payment.service";
+export { marketplaceService } from "./marketplace.service";
+export { investmentService } from "./investment.service";
+export { vendorService } from "./vendor.service";
+export { installmentService } from "./installment.service";

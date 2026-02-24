@@ -1,0 +1,541 @@
+// frontend/src/styles/_targetsave.scss
+
+// ─── Variables ───
+$targetsave-accent: #8B5CF6;
+$targetsave-accent-light: #F5F3FF;
+$targetsave-accent-dark: #5B21B6;
+
+// ─── Page Layout ───
+.targetsave-page-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1E252F;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.targetsave-title-icon {
+  color: $targetsave-accent;
+  font-size: 22px;
+}
+
+.targetsave-page-subtitle {
+  font-size: 14px;
+  color: #64748B;
+  margin: 4px 0 0;
+}
+
+// ─── Summary Card ───
+.targetsave-summary-card {
+  background: linear-gradient(135deg, $targetsave-accent 0%, $targetsave-accent-dark 100%);
+  border-radius: 16px;
+  padding: 24px 28px;
+  color: #FFFFFF;
+  margin-bottom: 24px;
+
+  .summary-label {
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+
+  .summary-value {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .summary-stat {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.9;
+  }
+}
+
+// ─── Filter Pills ───
+.targetsave-filter-pill {
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $targetsave-accent;
+    color: $targetsave-accent;
+  }
+
+  &.active {
+    background: $targetsave-accent;
+    border-color: $targetsave-accent;
+    color: #FFFFFF;
+  }
+}
+
+// ─── Plan Card ───
+.targetsave-card {
+  background: #FFFFFF;
+  border-radius: 14px;
+  border: 1px solid #F1F5F9;
+  padding: 20px;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+
+  &.completed {
+    opacity: 0.75;
+    border-color: #E2E8F0;
+  }
+
+  &.reached {
+    border-color: $targetsave-accent;
+    box-shadow: 0 0 0 1px $targetsave-accent;
+  }
+}
+
+// ─── Card Header ───
+.targetsave-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.targetsave-product-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: $targetsave-accent;
+  background: $targetsave-accent-light;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.targetsave-card-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E252F;
+  margin: 0;
+}
+
+// ─── Card Balance ───
+.targetsave-card-balance {
+  margin-bottom: 12px;
+}
+
+.targetsave-saved-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94A3B8;
+  margin-bottom: 2px;
+}
+
+.targetsave-saved-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1E252F;
+}
+
+.targetsave-target-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #94A3B8;
+}
+
+// ─── Goal Progress ───
+.targetsave-goal-section {
+  margin-bottom: 16px;
+}
+
+.targetsave-progress {
+  height: 8px;
+  background: #E2E8F0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.targetsave-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, $targetsave-accent, #A78BFA);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.targetsave-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
+}
+
+// ─── Info Tags ───
+.targetsave-info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.targetsave-info-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+
+  &.frequency {
+    background: $targetsave-accent-light;
+    color: $targetsave-accent;
+  }
+
+  &.countdown {
+    background: #FEF3C7;
+    color: #92400E;
+  }
+
+  &.reached-tag {
+    background: #ECFDF5;
+    color: #059669;
+  }
+
+  &.interest {
+    background: #EFF6FF;
+    color: #1E40AF;
+  }
+}
+
+// ─── Target Date Countdown ───
+.targetsave-countdown {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.targetsave-countdown-days {
+  color: #64748B;
+}
+
+.targetsave-countdown-reached {
+  color: $targetsave-accent;
+}
+
+// ─── Card Actions ───
+.targetsave-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #F1F5F9;
+}
+
+.targetsave-add-funds-btn {
+  background: $targetsave-accent !important;
+  border-color: $targetsave-accent !important;
+}
+
+// ─── Create Modal ───
+.targetsave-modal-header {
+  border-bottom: 1px solid #F1F5F9;
+  padding: 20px 24px;
+}
+
+.targetsave-modal-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: $targetsave-accent-light;
+  color: $targetsave-accent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+// ─── Step Progress ───
+.targetsave-step-progress {
+  height: 3px;
+  background: #E2E8F0;
+}
+
+.targetsave-step-progress-fill {
+  height: 100%;
+  background: $targetsave-accent;
+  transition: width 0.3s ease;
+}
+
+.targetsave-step-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E252F;
+  margin-bottom: 6px;
+}
+
+.targetsave-step-subtitle {
+  font-size: 14px;
+  color: #64748B;
+  margin-bottom: 20px;
+}
+
+.targetsave-modal-footer {
+  border-top: 1px solid #F1F5F9;
+  padding: 16px 24px;
+}
+
+.targetsave-btn-primary {
+  background: $targetsave-accent;
+  border-color: $targetsave-accent;
+  color: #FFFFFF;
+  font-weight: 600;
+
+  &:hover {
+    background: #7C3AED;
+    border-color: #7C3AED;
+  }
+
+  &:disabled {
+    background: #94A3B8;
+    border-color: #94A3B8;
+  }
+}
+
+// ─── Amount Input ───
+.targetsave-amount-input {
+  position: relative;
+
+  .amount-prefix {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    font-weight: 700;
+    color: $targetsave-accent;
+  }
+
+  input {
+    padding-left: 36px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 12px;
+    border: 2px solid #E2E8F0;
+    height: 52px;
+
+    &:focus {
+      border-color: $targetsave-accent;
+      box-shadow: 0 0 0 2px rgba($targetsave-accent, 0.15);
+    }
+  }
+}
+
+.targetsave-amount-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.targetsave-amount-hint {
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover, &.active {
+    border-color: $targetsave-accent;
+    color: $targetsave-accent;
+    background: $targetsave-accent-light;
+  }
+}
+
+// ─── Auto-Save Toggle ───
+.targetsave-autosave-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+
+  .form-check-input:checked {
+    background-color: $targetsave-accent;
+    border-color: $targetsave-accent;
+  }
+}
+
+// ─── Funding Source Options ───
+.targetsave-funding-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.targetsave-funding-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 2px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  input[type="radio"] {
+    accent-color: $targetsave-accent;
+    width: 18px;
+    height: 18px;
+  }
+
+  &.selected {
+    border-color: $targetsave-accent;
+    background: $targetsave-accent-light;
+  }
+}
+
+.targetsave-funding-info {
+  flex: 1;
+
+  strong {
+    display: block;
+    font-size: 14px;
+    color: #1E252F;
+  }
+
+  span {
+    font-size: 13px;
+    color: #64748B;
+  }
+}
+
+// ─── Time Estimate ───
+.targetsave-time-estimate {
+  background: $targetsave-accent-light;
+  border: 1px solid rgba($targetsave-accent, 0.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: $targetsave-accent-dark;
+  font-weight: 600;
+}
+
+// ─── Review Card ───
+.targetsave-review-card {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.targetsave-review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+
+  span { color: #64748B; }
+  strong { color: #1E252F; }
+
+  &.total {
+    padding-top: 12px;
+    span { font-weight: 700; color: #1E252F; }
+    strong { font-size: 18px; font-weight: 800; }
+  }
+}
+
+// ─── Callouts ───
+.targetsave-callout {
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+  margin-top: 16px;
+  line-height: 1.5;
+
+  &.info {
+    background: $targetsave-accent-light;
+    border: 1px solid rgba($targetsave-accent, 0.2);
+    color: $targetsave-accent-dark;
+
+    strong { color: $targetsave-accent-dark; }
+  }
+
+  &.warning {
+    background: #FEF3C7;
+    border: 1px solid #FDE68A;
+    color: #92400E;
+
+    strong { color: #78350F; }
+  }
+}
+
+// ─── Empty State ───
+.targetsave-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: #FFFFFF;
+  border-radius: 14px;
+  border: 1px solid #F1F5F9;
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: $targetsave-accent-light;
+    color: $targetsave-accent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+
+  h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1E252F;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 14px;
+    color: #64748B;
+    max-width: 380px;
+    margin: 0 auto 20px;
+    line-height: 1.6;
+  }
+}
+
+// ─── Responsive ───
+@media (max-width: 767.98px) {
+  .targetsave-summary-card .summary-value {
+    font-size: 22px;
+  }
+
+  .targetsave-card-balance .targetsave-saved-value {
+    font-size: 20px;
+  }
+}

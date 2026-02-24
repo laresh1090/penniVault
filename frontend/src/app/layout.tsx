@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Quicksand, Manrope, Caveat } from "next/font/google";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "@/styles/template/flaticon.css";
 import "./globals.scss";
 import "@/lib/fontawesome";
 import BootstrapClient from "@/components/providers/BootstrapClient";
@@ -8,26 +9,33 @@ import AppProviders from "@/components/providers/AppProviders";
 import MotionProvider from "@/app/providers/motion-provider";
 import { ToastProvider } from "@/contexts/ToastContext";
 
-const inter = Inter({
+const quicksand = Quicksand({
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-inter",
+  variable: "--font-quicksand",
 });
 
-const poppins = Poppins({
+const manrope = Manrope({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
-  variable: "--font-poppins",
+  variable: "--font-primary",
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-caveat",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "PenniVault \u2014 Asset Acquisition Infrastructure",
+    default: "PenniVault \u2014 Save & Invest",
     template: "%s | PenniVault",
   },
   description:
-    "PenniVault helps partner brands digitize and manage high-ticket asset acquisition through structured installment plans, savings, and marketplace integration.",
+    "PenniVault helps you save smarter and invest better. Automated savings, fixed deposits, goal-based savings, group savings, and crowd investment opportunities in agriculture and real estate.",
 };
 
 export default function RootLayout({
@@ -36,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
+    <html lang="en" className={`${quicksand.variable} ${manrope.variable} ${caveat.variable}`}>
       <body>
         <AppProviders>
           <MotionProvider>

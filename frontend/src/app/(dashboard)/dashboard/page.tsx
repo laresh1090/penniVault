@@ -1,367 +1,343 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faWallet,
-  faCoins,
   faPiggyBank,
-  faMoneyBillWave,
-  faPlus,
-  faDownload,
-  faExchangeAlt,
-  faUsers,
-  faHouseChimney,
-  faCar,
+  faChartLine,
+  faSeedling,
+  faLandmark,
 } from "@fortawesome/free-solid-svg-icons";
-
-import WalletCard from "@/components/ui/WalletCard";
-import DashCard from "@/components/ui/DashCard";
-import DataTable from "@/components/ui/DataTable";
-import StatusBadge from "@/components/ui/StatusBadge";
-import QuickActionBtn from "@/components/ui/QuickActionBtn";
-import GroupSavingsStatusCard from "@/components/ui/GroupSavingsStatusCard";
-import DepositModal from "@/components/dashboard/DepositModal";
-import WithdrawModal from "@/components/dashboard/WithdrawModal";
-
-import { mockTransactions } from "@/data/transactions";
-import { mockSavingsPlans, mockGroupSavings } from "@/data/savings";
-import { mockAssets } from "@/data/assets";
-import { mockWalletSummary } from "@/data/dashboard";
-import { formatNaira, formatDate } from "@/lib/formatters";
-
-type SavingsRow = Record<string, unknown> & {
-  id: string;
-  name: string;
-  targetAmount: number;
-  currentAmount: number;
-  endDate: string;
-  status: "active" | "pending" | "completed" | "overdue" | "paused" | "draft";
-};
-
-type TransactionRow = Record<string, unknown> & {
-  id: string;
-  description: string;
-  amount: number;
-  status: "active" | "pending" | "completed" | "overdue" | "paused" | "draft";
-  createdAt: string;
-};
+import { useAuth } from "@/contexts/auth-context";
+import { useWallet, useTransactions, useSavingsPlans, useInvestments, useListings } from "@/hooks";
+import { useUserInvestments } from "@/hooks/useUserInvestments";
+import { savingsService, SavingsSummary } from "@/services/savings.service";
+import BalanceCard from "@/components/dashboard/BalanceCard";
+import SavingsProductGrid from "@/components/dashboard/SavingsProductGrid";
+import InvestmentCard from "@/components/dashboard/InvestmentCard";
+import TransactionItem from "@/components/dashboard/TransactionItem";
+import { formatNaira } from "@/lib/formatters";
 
 export default function UserDashboardPage() {
-  const [showDeposit, setShowDeposit] = useState(false);
-  const [showWithdraw, setShowWithdraw] = useState(false);
+  const { user } = useAuth();
+  const { wallet, isLoading: walletLoading } = useWallet();
+  const { transactions, isLoading: txnLoading } = useTransactions();
+  const { investments: userInvestments, summary: investSummary, isLoading: investLoading } = useUserInvestments();
+  const { plans: savingsPlans, isLoading: plansLoading } = useSavingsPlans({ status: "active" });
+  const { investments: featuredInvestments, isLoading: featInvestLoading } = useInvestments({ status: "open", perPage: 3 });
+  const { listings, isLoading: listingsLoading } = useListings({ perPage: 4 });
+  const [savingsSummary, setSavingsSummary] = useState<SavingsSummary | null>(null);
 
-  const activeSavingsPlans: SavingsRow[] = mockSavingsPlans
-    .filter((plan) => plan.status === "active")
-    .map((plan) => ({
-      ...plan,
-      status: plan.status as SavingsRow["status"],
-    })) as unknown as SavingsRow[];
+  useEffect(() => {
+    savingsService.getSavingsSummary().then(setSavingsSummary).catch(() => {});
+  }, []);
 
-  const recentTransactions: TransactionRow[] = mockTransactions
-    .slice(0, 5)
-    .map((txn) => ({
-      ...txn,
-      status: txn.status as TransactionRow["status"],
-    })) as unknown as TransactionRow[];
+  const hour = new Date().getHours();
+  const timeGreeting =
+    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const firstName = user?.firstName || "User";
+
+  const walletBalance = wallet?.realBalance ?? 0;
+  const totalSavings = savingsSummary?.totalSavings ?? 0;
+  const totalInvested = investSummary?.totalInvested ?? 0;
+  const totalBalance = walletBalance + totalSavings;
+
+  const savingsBreakdown = savingsSummary?.savingsBreakdown ?? {
+    pennisave: 0,
+    pennilock: 0,
+    targetsave: 0,
+    penniajo: 0,
+  };
+
+  const recentTxns = transactions.slice(0, 5);
+  const activePlans = savingsPlans.slice(0, 3);
+
+  if (walletLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ padding: "60px 0" }}>
+        <div className="spinner-border" role="status" style={{ color: "#EB5310" }}>
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h2
-        className="mb-4"
-        style={{ fontSize: "1.5rem", fontWeight: 800, color: "#1E252F" }}
-      >
-        Welcome back, Adebayo!
-      </h2>
+    <>
+      {/* Section 1: Welcome + Balance */}
+      <BalanceCard
+        greeting={`${timeGreeting}, ${firstName}`}
+        totalBalance={totalBalance}
+      />
 
-      {/* Row 1 - Wallet Summary */}
-      <div className="row g-4 mb-4">
-        <div className="col-md-6 col-xl-3">
-          <WalletCard
-            variant="real-wallet"
-            icon={faWallet}
-            label="Real Wallet"
-            amount={mockWalletSummary.realBalance}
-            actionLabel="Deposit"
-            actionHref="/wallet"
-            trend={{ value: "+12.5%", direction: "up" }}
-          />
+      {/* Section 2: Wallet Breakdown Row */}
+      <div className="row g-3 mb-4">
+        <div className="col-md-4">
+          <div className="wallet-summary-card">
+            <div className="wallet-summary-icon" style={{ background: "rgba(235, 83, 16, 0.1)", color: "#EB5310" }}>
+              <FontAwesomeIcon icon={faWallet} />
+            </div>
+            <div>
+              <p className="wallet-summary-label">Wallet Balance</p>
+              <p className="wallet-summary-amount">{formatNaira(walletBalance)}</p>
+            </div>
+          </div>
         </div>
-        <div className="col-md-6 col-xl-3">
-          <WalletCard
-            variant="virtual-wallet"
-            icon={faCoins}
-            label="Virtual Wallet"
-            amount={mockWalletSummary.virtualBalance}
-          />
+        <div className="col-md-4">
+          <div className="wallet-summary-card">
+            <div className="wallet-summary-icon" style={{ background: "rgba(5, 150, 105, 0.1)", color: "#059669" }}>
+              <FontAwesomeIcon icon={faPiggyBank} />
+            </div>
+            <div>
+              <p className="wallet-summary-label">Total Savings</p>
+              <p className="wallet-summary-amount">{formatNaira(totalSavings)}</p>
+            </div>
+          </div>
         </div>
-        <div className="col-md-6 col-xl-3">
-          <WalletCard
-            variant="total-savings"
-            icon={faPiggyBank}
-            label="Total Savings"
-            amount={mockWalletSummary.totalSavings}
-            trend={{ value: "+8.3%", direction: "up" }}
-          />
-        </div>
-        <div className="col-md-6 col-xl-3">
-          <WalletCard
-            variant="monthly-rate"
-            icon={faMoneyBillWave}
-            label="Monthly Savings"
-            amount={mockWalletSummary.monthlySavingsRate}
-          />
+        <div className="col-md-4">
+          <div className="wallet-summary-card">
+            <div className="wallet-summary-icon" style={{ background: "rgba(99, 102, 241, 0.1)", color: "#6366F1" }}>
+              <FontAwesomeIcon icon={faChartLine} />
+            </div>
+            <div>
+              <p className="wallet-summary-label">Total Invested</p>
+              <p className="wallet-summary-amount">{formatNaira(totalInvested)}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Row 2 - Active Savings Plans Table */}
-      <DashCard
-        title="Active Savings Plans"
-        actionLabel="View All"
-        actionHref="/savings"
-      >
-        <DataTable<SavingsRow>
-          columns={[
-            { key: "name", header: "Plan Name" },
-            {
-              key: "target",
-              header: "Target",
-              render: (item) => formatNaira(item.targetAmount, false),
-            },
-            {
-              key: "saved",
-              header: "Saved",
-              render: (item) => formatNaira(item.currentAmount, false),
-            },
-            {
-              key: "progress",
-              header: "Progress",
-              render: (item) => {
-                const pct = Math.round(
-                  (item.currentAmount / item.targetAmount) * 100
-                );
-                return (
-                  <div className="d-flex align-items-center gap-2">
-                    <div
-                      style={{
-                        flex: 1,
-                        height: 8,
-                        background: "#F1F5F9",
-                        borderRadius: 4,
-                        overflow: "hidden",
-                        minWidth: 60,
-                      }}
+      {/* Section 3: Savings & Investments Product Grid */}
+      <h5 className="dash-section-title">Savings & Investments</h5>
+      <SavingsProductGrid balances={savingsBreakdown} />
+
+      {/* Section 4: Active Savings Plans */}
+      <div className="dash-card mb-4">
+        <div className="card-header">
+          <h3 className="card-title">Active Savings Plans</h3>
+          <Link href="/savings" className="card-action">
+            View All
+          </Link>
+        </div>
+        {plansLoading ? (
+          <div className="d-flex justify-content-center py-4">
+            <div className="spinner-border spinner-border-sm" role="status" style={{ color: "#EB5310" }}>
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        ) : activePlans.length === 0 ? (
+          <p style={{ color: "#94A3B8", fontSize: 14, textAlign: "center", padding: 32 }}>
+            No active savings plans. <Link href="/savings" style={{ color: "#EB5310" }}>Start one today!</Link>
+          </p>
+        ) : (
+          <div className="savings-plans-preview">
+            {activePlans.map((plan) => {
+              const progress = plan.targetAmount > 0
+                ? Math.min(100, Math.round((plan.currentAmount / plan.targetAmount) * 100))
+                : 0;
+              const productLabels: Record<string, string> = {
+                pennisave: "PenniSave",
+                pennilock: "PenniLock",
+                targetsave: "TargetSave",
+              };
+              const productColors: Record<string, string> = {
+                pennisave: "#EB5310",
+                pennilock: "#6366F1",
+                targetsave: "#059669",
+              };
+              return (
+                <Link
+                  key={plan.id}
+                  href={`/savings/${plan.id}`}
+                  className="savings-plan-row"
+                >
+                  <div className="savings-plan-info">
+                    <span
+                      className="savings-plan-badge"
+                      style={{ background: `${productColors[plan.productType] ?? "#64748B"}15`, color: productColors[plan.productType] ?? "#64748B" }}
                     >
+                      {productLabels[plan.productType] ?? plan.productType}
+                    </span>
+                    <span className="savings-plan-name">{plan.name}</span>
+                  </div>
+                  <div className="savings-plan-progress-wrap">
+                    <div className="savings-plan-amounts">
+                      <span>{formatNaira(plan.currentAmount, false)}</span>
+                      <span className="savings-plan-target">/ {formatNaira(plan.targetAmount, false)}</span>
+                    </div>
+                    <div className="savings-progress" style={{ height: 6 }}>
                       <div
-                        style={{
-                          width: `${Math.min(pct, 100)}%`,
-                          height: "100%",
-                          borderRadius: 4,
-                          background:
-                            pct >= 75
-                              ? "#059669"
-                              : pct >= 50
-                                ? "#D97706"
-                                : "linear-gradient(90deg, #EB5310, #FAA019)",
-                        }}
+                        className="progress-fill"
+                        style={{ width: `${progress}%`, background: productColors[plan.productType] ?? "#EB5310" }}
                       />
                     </div>
-                    <span
-                      style={{
-                        fontSize: "0.75rem",
-                        fontWeight: 600,
-                        color: "#64748B",
-                        minWidth: 36,
-                      }}
-                    >
-                      {pct}%
-                    </span>
                   </div>
-                );
-              },
-            },
-            {
-              key: "endDate",
-              header: "Due Date",
-              render: (item) => formatDate(item.endDate as string),
-            },
-            {
-              key: "status",
-              header: "Status",
-              render: (item) => <StatusBadge status={item.status} />,
-            },
-          ]}
-          data={activeSavingsPlans}
-        />
-      </DashCard>
-
-      {/* Row 3 - Group Savings Status Cards */}
-      <div className="row g-4 mb-4">
-        {mockGroupSavings.map((group) => (
-          <div key={group.id} className="col-lg-6">
-            <GroupSavingsStatusCard
-              name={group.name}
-              memberCount={`${group.filledSlots}/${group.totalSlots}`}
-              poolSize={group.contributionAmount * group.filledSlots}
-              contribution={group.contributionAmount}
-              frequency={group.frequency}
-              position={
-                group.members.find((m) => m.userId === "usr_001")?.position ?? 0
-              }
-              currentRound={`${group.currentRound} of ${group.totalRounds}`}
-              progress={(group.currentRound / group.totalRounds) * 100}
-              href={`/savings/groups/${group.id}`}
-            />
+                  <span className="savings-plan-percent">{progress}%</span>
+                </Link>
+              );
+            })}
           </div>
-        ))}
+        )}
       </div>
 
-      {/* Row 4 - Split: Recent Transactions + Featured Listings */}
-      <div className="row g-4 mb-4">
-        <div className="col-lg-7">
-          <DashCard
-            title="Recent Transactions"
-            actionLabel="View All"
-            actionHref="/transactions"
-          >
-            <DataTable<TransactionRow>
-              columns={[
-                {
-                  key: "date",
-                  header: "Date",
-                  render: (item) => formatDate(item.createdAt),
-                },
-                {
-                  key: "desc",
-                  header: "Description",
-                  render: (item) => item.description as string,
-                },
-                {
-                  key: "amount",
-                  header: "Amount",
-                  render: (item) => {
-                    const amt = item.amount as number;
-                    return (
-                      <span
-                        className={
-                          amt > 0 ? "amount-positive" : "amount-negative"
-                        }
-                      >
-                        {amt > 0 ? "+" : ""}
-                        {formatNaira(Math.abs(amt), false)}
-                      </span>
-                    );
-                  },
-                },
-                {
-                  key: "status",
-                  header: "Status",
-                  render: (item) => <StatusBadge status={item.status} />,
-                },
-              ]}
-              data={recentTransactions}
-            />
-          </DashCard>
+      {/* Section 5: Active Investments */}
+      <div className="dash-card mb-4">
+        <div className="card-header">
+          <h3 className="card-title">My Investments</h3>
+          <Link href="/marketplace/investments" className="card-action">
+            View All
+          </Link>
         </div>
-        <div className="col-lg-5">
-          <DashCard
-            title="Featured Listings"
-            actionLabel="Browse All"
-            actionHref="/marketplace"
-          >
-            {mockAssets.slice(0, 3).map((asset) => (
-              <div
-                key={asset.id}
-                className="d-flex gap-3 align-items-center mb-3 pb-3"
-                style={{ borderBottom: "1px solid #F1F5F9" }}
-              >
-                <div
-                  style={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: 8,
-                    background: "#F1F5F9",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={
-                      asset.category === "property" ? faHouseChimney : faCar
-                    }
-                    style={{ color: "#94A3B8", fontSize: "1.25rem" }}
-                  />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      fontSize: "0.875rem",
-                      fontWeight: 600,
-                      color: "#1E252F",
-                    }}
-                  >
-                    {asset.title}
-                  </div>
-                  <div style={{ fontSize: "0.8125rem", color: "#64748B" }}>
-                    {asset.location}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.9375rem",
-                      fontWeight: 700,
-                      color: "#EB5310",
-                    }}
-                  >
-                    {formatNaira(asset.price, false)}
-                  </div>
-                </div>
+        {investLoading ? (
+          <div className="d-flex justify-content-center py-4">
+            <div className="spinner-border spinner-border-sm" role="status" style={{ color: "#EB5310" }}>
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        ) : userInvestments.length === 0 ? (
+          <p style={{ color: "#94A3B8", fontSize: 14, textAlign: "center", padding: 32 }}>
+            You haven&apos;t made any investments yet. <Link href="/marketplace/investments" style={{ color: "#EB5310" }}>Browse opportunities</Link>.
+          </p>
+        ) : (
+          <div className="row g-3">
+            {userInvestments.slice(0, 3).map((inv) => (
+              <div key={inv.id} className="col-md-6 col-lg-4">
+                <InvestmentCard investment={inv} />
               </div>
             ))}
-          </DashCard>
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Row 5 - Quick Actions */}
-      <DashCard title="Quick Actions">
-        <div className="quick-actions">
-          <QuickActionBtn icon={faPlus} onClick={() => setShowDeposit(true)}>
-            Deposit Money
-          </QuickActionBtn>
-          <QuickActionBtn
-            variant="secondary"
-            icon={faDownload}
-            onClick={() => setShowWithdraw(true)}
-          >
-            Withdraw
-          </QuickActionBtn>
-          <QuickActionBtn
-            variant="outline"
-            icon={faExchangeAlt}
-            href="/savings"
-          >
-            New Savings Plan
-          </QuickActionBtn>
-          <QuickActionBtn
-            variant="outline"
-            icon={faUsers}
-            href="/savings/groups"
-          >
-            Join Group
-          </QuickActionBtn>
+      {/* Section 6: Featured Investments */}
+      <div className="dash-card mb-4">
+        <div className="card-header">
+          <h3 className="card-title">Featured Investments</h3>
+          <Link href="/investments" className="card-action">
+            Browse All
+          </Link>
         </div>
-      </DashCard>
+        {featInvestLoading ? (
+          <div className="d-flex justify-content-center py-4">
+            <div className="spinner-border spinner-border-sm" role="status" style={{ color: "#EB5310" }}>
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        ) : featuredInvestments.length === 0 ? (
+          <p style={{ color: "#94A3B8", fontSize: 14, textAlign: "center", padding: 32 }}>
+            No investment opportunities available right now.
+          </p>
+        ) : (
+          <div className="row g-3 p-3">
+            {featuredInvestments.slice(0, 3).map((inv) => {
+              const funded = Math.round((inv.raisedAmount / inv.targetAmount) * 100);
+              return (
+                <div key={inv.id} className="col-md-6 col-lg-4">
+                  <Link href={`/investments/${inv.id}`} className="featured-invest-card">
+                    <div className="featured-invest-img-wrap">
+                      <img src={inv.imageUrl} alt={inv.title} />
+                      <span className={`featured-invest-badge ${inv.category}`}>
+                        <FontAwesomeIcon icon={inv.category === "agriculture" ? faSeedling : faLandmark} />
+                        {inv.category === "agriculture" ? "Agriculture" : "Real Estate"}
+                      </span>
+                    </div>
+                    <div className="featured-invest-body">
+                      <h6 className="featured-invest-title">{inv.title}</h6>
+                      <p className="featured-invest-location">{inv.location}</p>
+                      <div className="featured-invest-stats">
+                        <span className="featured-invest-return">{inv.expectedReturnPercent}% p.a.</span>
+                        <span className="featured-invest-funded">{funded}% funded</span>
+                      </div>
+                      <div className="featured-invest-meta">
+                        <span>Min: {formatNaira(inv.minimumInvestment, false)}</span>
+                        <span>{inv.investorsCount} investor{inv.investorsCount !== 1 ? "s" : ""}</span>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
-      {/* Modals */}
-      <DepositModal
-        isOpen={showDeposit}
-        onClose={() => setShowDeposit(false)}
-      />
-      <WithdrawModal
-        isOpen={showWithdraw}
-        onClose={() => setShowWithdraw(false)}
-        maxAmount={mockWalletSummary.realBalance}
-      />
-    </div>
+      {/* Section 7: Marketplace Highlights */}
+      <div className="dash-card mb-4">
+        <div className="card-header">
+          <h3 className="card-title">Marketplace</h3>
+          <Link href="/marketplace" className="card-action">
+            View All
+          </Link>
+        </div>
+        {listingsLoading ? (
+          <div className="d-flex justify-content-center py-4">
+            <div className="spinner-border spinner-border-sm" role="status" style={{ color: "#EB5310" }}>
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        ) : listings.length === 0 ? (
+          <p style={{ color: "#94A3B8", fontSize: 14, textAlign: "center", padding: 32 }}>
+            No marketplace listings available.
+          </p>
+        ) : (
+          <div className="row g-3 p-3">
+            {listings.slice(0, 4).map((item) => {
+              const imgSrc = item.primaryImage || item.images?.[0] || "/img/placeholder.jpg";
+              const categoryLabels: Record<string, string> = {
+                property: "Property",
+                car: "Automobile",
+                land: "Land",
+                other: "Other",
+              };
+              return (
+                <div key={item.id} className="col-6 col-lg-3">
+                  <Link href={`/marketplace/${item.id}`} className="marketplace-preview-card">
+                    <div className="marketplace-preview-img">
+                      <img src={imgSrc} alt={item.title} />
+                      <span className="marketplace-preview-badge">
+                        {categoryLabels[item.category] ?? item.category}
+                      </span>
+                    </div>
+                    <div className="marketplace-preview-body">
+                      <h6 className="marketplace-preview-title">{item.title}</h6>
+                      <span className="marketplace-preview-price">{formatNaira(item.price, false)}</span>
+                    </div>
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Section 8: Recent Transactions */}
+      <div className="dash-card">
+        <div className="card-header">
+          <h3 className="card-title">Recent Transactions</h3>
+          <Link href="/wallet" className="card-action">
+            View All
+          </Link>
+        </div>
+        {txnLoading ? (
+          <div className="d-flex justify-content-center py-4">
+            <div className="spinner-border spinner-border-sm" role="status" style={{ color: "#EB5310" }}>
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        ) : recentTxns.length === 0 ? (
+          <p style={{ color: "#94A3B8", fontSize: 14, textAlign: "center", padding: 32 }}>
+            No transactions yet.
+          </p>
+        ) : (
+          <div className="transaction-list">
+            {recentTxns.map((txn) => (
+              <TransactionItem key={txn.id} transaction={txn} />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 }

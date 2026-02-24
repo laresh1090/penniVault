@@ -3,446 +3,598 @@
 import { useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faWallet,
+  faCoins,
   faPlus,
+  faArrowDown,
   faDownload,
   faBuildingColumns,
-  faCreditCard,
 } from "@fortawesome/free-solid-svg-icons";
 
-import DashCard from "@/components/ui/DashCard";
-import DataTable from "@/components/ui/DataTable";
-import StatusBadge from "@/components/ui/StatusBadge";
-import DepositModal from "@/components/dashboard/DepositModal";
-import WithdrawModal from "@/components/dashboard/WithdrawModal";
-
-import { mockTransactions } from "@/data/transactions";
-import { mockPaymentMethods } from "@/data/wallets";
-import { mockWalletSummary } from "@/data/dashboard";
+import { useWallet, useTransactions } from "@/hooks";
 import { formatNaira, formatDate } from "@/lib/formatters";
-import { cn } from "@/lib/utils";
-
-type TransactionRow = Record<string, unknown> & {
-  id: string;
-  type: string;
-  category: string;
-  description: string;
-  amount: number;
-  balanceAfter: number;
-  status: "active" | "pending" | "completed" | "overdue" | "paused" | "draft";
-  createdAt: string;
-};
+import { walletService } from "@/services/wallet.service";
+import { extractApiError } from "@/lib/api";
 
 export default function WalletPage() {
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  const filteredTransactions: TransactionRow[] = useMemo(() => {
-    return mockTransactions
-      .filter((txn) => {
-        if (typeFilter !== "all") {
-          const typeMap: Record<string, string[]> = {
-            deposits: ["deposit"],
-            withdrawals: ["withdrawal"],
-            savings: ["savings_contribution", "savings_payout"],
-            group: ["group_contribution", "group_payout"],
-          };
-          if (typeMap[typeFilter] && !typeMap[typeFilter].includes(txn.type)) {
-            return false;
-          }
-        }
-        if (statusFilter !== "all" && txn.status !== statusFilter) {
+  // Deposit modal state
+  const [depositAmount, setDepositAmount] = useState("");
+  const [depositMethodId, setDepositMethodId] = useState("");
+  const [depositSubmitting, setDepositSubmitting] = useState(false);
+  const [depositError, setDepositError] = useState("");
+
+  // Withdraw modal state
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawMethodId, setWithdrawMethodId] = useState("");
+  const [withdrawSubmitting, setWithdrawSubmitting] = useState(false);
+  const [withdrawError, setWithdrawError] = useState("");
+
+  const { wallet, paymentMethods, isLoading: walletLoading, refetch } = useWallet();
+  const { transactions: allTransactions, isLoading: txnLoading, refetch: refetchTransactions } = useTransactions();
+
+  const filteredTransactions = useMemo(() => {
+    return allTransactions.filter((txn) => {
+      if (typeFilter !== "all") {
+        const typeMap: Record<string, string[]> = {
+          deposits: ["deposit"],
+          withdrawals: ["withdrawal"],
+          transfers: ["transfer"],
+          savings: ["savings_contribution", "savings_payout", "group_contribution", "group_payout"],
+        };
+        if (typeMap[typeFilter] && !typeMap[typeFilter].includes(txn.type)) {
           return false;
         }
-        if (dateFrom) {
-          const txnDate = new Date(txn.createdAt);
-          const fromDate = new Date(dateFrom);
-          if (txnDate < fromDate) return false;
-        }
-        if (dateTo) {
-          const txnDate = new Date(txn.createdAt);
-          const toDate = new Date(dateTo);
-          toDate.setHours(23, 59, 59, 999);
-          if (txnDate > toDate) return false;
-        }
-        return true;
-      })
-      .map((txn) => ({
-        ...txn,
-        status: txn.status as TransactionRow["status"],
-      })) as unknown as TransactionRow[];
-  }, [typeFilter, statusFilter, dateFrom, dateTo]);
+      }
+      if (dateFrom) {
+        const txnDate = new Date(txn.createdAt);
+        const fromDate = new Date(dateFrom);
+        if (txnDate < fromDate) return false;
+      }
+      if (dateTo) {
+        const txnDate = new Date(txn.createdAt);
+        const toDate = new Date(dateTo);
+        toDate.setHours(23, 59, 59, 999);
+        if (txnDate > toDate) return false;
+      }
+      return true;
+    });
+  }, [allTransactions, typeFilter, dateFrom, dateTo]);
 
-  const getTypeBadge = (type: string) => {
-    const typeStyles: Record<
-      string,
-      { label: string; bg: string; color: string }
-    > = {
-      deposit: { label: "Deposit", bg: "#ECFDF5", color: "#059669" },
-      withdrawal: { label: "Withdrawal", bg: "#FEF2F2", color: "#DC2626" },
-      savings_contribution: {
-        label: "Savings",
-        bg: "#EFF6FF",
-        color: "#2563EB",
-      },
-      savings_payout: { label: "Payout", bg: "#F0F9FF", color: "#0EA5E9" },
-      group_contribution: {
-        label: "Group",
-        bg: "#FFF8EB",
-        color: "#D97706",
-      },
-      group_payout: {
-        label: "Group Payout",
-        bg: "#ECFDF5",
-        color: "#059669",
-      },
-      transfer: { label: "Transfer", bg: "#F1F5F9", color: "#64748B" },
-      commission: { label: "Commission", bg: "#FFF7ED", color: "#EB5310" },
-    };
-    const style = typeStyles[type] || {
-      label: type,
-      bg: "#F1F5F9",
-      color: "#64748B",
-    };
-    return (
-      <span
-        style={{
-          display: "inline-block",
-          padding: "4px 10px",
-          borderRadius: 20,
-          fontSize: "0.75rem",
-          fontWeight: 600,
-          background: style.bg,
-          color: style.color,
-        }}
-      >
-        {style.label}
-      </span>
-    );
+  const getTypeBadgeClass = (type: string): string => {
+    switch (type) {
+      case "deposit":
+        return "active";
+      case "withdrawal":
+        return "overdue";
+      case "savings_contribution":
+      case "savings_payout":
+        return "pending";
+      case "group_contribution":
+      case "group_payout":
+        return "confirmed";
+      case "transfer":
+        return "paused";
+      case "commission":
+        return "completed";
+      default:
+        return "draft";
+    }
   };
 
-  return (
-    <div>
-      <h2
-        className="mb-4"
-        style={{ fontSize: "1.5rem", fontWeight: 800, color: "#1E252F" }}
-      >
-        My Wallet
-      </h2>
+  const getTypeLabel = (type: string): string => {
+    switch (type) {
+      case "deposit":
+        return "Deposit";
+      case "withdrawal":
+        return "Withdrawal";
+      case "savings_contribution":
+        return "Savings";
+      case "savings_payout":
+        return "Payout";
+      case "group_contribution":
+        return "Group";
+      case "group_payout":
+        return "Group Payout";
+      case "transfer":
+        return "Transfer";
+      case "commission":
+        return "Commission";
+      default:
+        return type;
+    }
+  };
 
-      {/* Row 1 - Dual Wallet Hero Cards */}
+  const getStatusBadgeClass = (status: string): string => {
+    switch (status) {
+      case "completed":
+        return "completed";
+      case "pending":
+        return "pending";
+      case "failed":
+        return "overdue";
+      default:
+        return "draft";
+    }
+  };
+
+  // Open deposit modal — initialize depositMethodId to first payment method
+  const openDepositModal = () => {
+    setDepositAmount("");
+    setDepositMethodId(paymentMethods[0]?.id ?? "");
+    setDepositError("");
+    setShowDeposit(true);
+  };
+
+  // Open withdraw modal — initialize withdrawMethodId to first payment method
+  const openWithdrawModal = () => {
+    setWithdrawAmount("");
+    setWithdrawMethodId(paymentMethods[0]?.id ?? "");
+    setWithdrawError("");
+    setShowWithdraw(true);
+  };
+
+  const handleDeposit = async () => {
+    setDepositError("");
+    const amount = Number(depositAmount);
+    if (!amount || amount < 100) {
+      setDepositError("Minimum deposit amount is \u20A6100.");
+      return;
+    }
+    setDepositSubmitting(true);
+    try {
+      await walletService.depositToWallet({ amount, channel: "bank_transfer" });
+      await Promise.all([refetch(), refetchTransactions()]);
+      setShowDeposit(false);
+      setDepositAmount("");
+      setDepositMethodId("");
+    } catch (err) {
+      setDepositError(extractApiError(err));
+    } finally {
+      setDepositSubmitting(false);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    setWithdrawError("");
+    const amount = Number(withdrawAmount);
+    if (!amount || amount < 100) {
+      setWithdrawError("Minimum withdrawal amount is \u20A6100.");
+      return;
+    }
+    if (wallet && amount > wallet.realBalance) {
+      setWithdrawError("Insufficient balance. You cannot withdraw more than your available balance.");
+      return;
+    }
+    setWithdrawSubmitting(true);
+    try {
+      await walletService.withdrawFromWallet({ amount, paymentMethodId: withdrawMethodId });
+      await Promise.all([refetch(), refetchTransactions()]);
+      setShowWithdraw(false);
+      setWithdrawAmount("");
+      setWithdrawMethodId("");
+    } catch (err) {
+      setWithdrawError(extractApiError(err));
+    } finally {
+      setWithdrawSubmitting(false);
+    }
+  };
+
+  if (walletLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ padding: "60px 0" }}>
+        <div className="spinner-border text-primary" role="status" style={{ color: "#EB5310" }}>
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Page Heading */}
+      <h2 style={{ fontSize: "24px", fontWeight: 800, marginBottom: "1.5rem" }}>My Wallet</h2>
+
+      {/* Wallet Cards Row */}
       <div className="row g-4 mb-4">
+        {/* Real Wallet */}
         <div className="col-md-6">
-          <div className={cn("wallet-hero-card", "real")}>
-            <p
-              className="mb-1"
-              style={{ fontSize: 14, opacity: 0.85, fontWeight: 500 }}
-            >
-              Real Wallet
-            </p>
-            <p className="mb-1" style={{ fontSize: 36, fontWeight: 800 }}>
-              {formatNaira(mockWalletSummary.realBalance, false)}
-            </p>
-            <p
-              className="mb-3"
-              style={{ fontSize: 13, opacity: 0.7, marginTop: 0 }}
-            >
-              Available for withdrawals and payments
+          <div className="wallet-detail-card real">
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>
+                Real Wallet
+              </span>
+              <FontAwesomeIcon
+                icon={faWallet}
+                style={{ fontSize: "32px", color: "rgba(255,255,255,0.3)" }}
+              />
+            </div>
+            <p style={{ fontSize: "36px", fontWeight: 800, color: "#FFFFFF", marginBottom: "20px", lineHeight: 1.1 }}>
+              {formatNaira(wallet?.realBalance ?? 0, false)}
             </p>
             <div className="d-flex gap-2">
               <button
-                className="btn btn-light btn-sm fw-bold"
-                onClick={() => setShowDeposit(true)}
+                className="btn btn-light btn-sm"
+                style={{ fontWeight: 600 }}
+                onClick={openDepositModal}
               >
                 <FontAwesomeIcon icon={faPlus} className="me-1" /> Deposit
               </button>
               <button
-                className="btn btn-outline-light btn-sm fw-bold"
-                onClick={() => setShowWithdraw(true)}
+                className="btn btn-outline-light btn-sm"
+                style={{ fontWeight: 600 }}
+                onClick={openWithdrawModal}
               >
-                <FontAwesomeIcon icon={faDownload} className="me-1" /> Withdraw
+                <FontAwesomeIcon icon={faArrowDown} className="me-1" /> Withdraw
               </button>
             </div>
           </div>
         </div>
+
+        {/* Virtual Wallet */}
         <div className="col-md-6">
-          <div className={cn("wallet-hero-card", "virtual")}>
-            <p
-              className="mb-1"
-              style={{ fontSize: 14, opacity: 0.85, fontWeight: 500 }}
-            >
-              Virtual Wallet
-            </p>
-            <p className="mb-1" style={{ fontSize: 36, fontWeight: 800 }}>
-              {formatNaira(mockWalletSummary.virtualBalance, false)}
-            </p>
-            <p
-              className="mb-3"
-              style={{ fontSize: 13, opacity: 0.7, marginTop: 0 }}
-            >
-              Converts when group savings turn is received
-            </p>
-            <div className="d-flex gap-2">
-              <span
-                style={{
-                  display: "inline-block",
-                  padding: "6px 14px",
-                  borderRadius: 20,
-                  background: "rgba(255,255,255,0.2)",
-                  fontSize: "0.8125rem",
-                  fontWeight: 600,
-                }}
-              >
-                <FontAwesomeIcon icon={faCreditCard} className="me-1" />{" "}
-                Virtual Balance
+          <div className="wallet-detail-card virtual">
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>
+                Virtual Wallet{" "}
+                <span
+                  className="info-tooltip"
+                  data-tip="Credits from group savings entitlements"
+                  style={{ background: "rgba(255,255,255,0.3)", color: "#FFFFFF" }}
+                >
+                  i
+                </span>
               </span>
+              <FontAwesomeIcon
+                icon={faCoins}
+                style={{ fontSize: "32px", color: "rgba(255,255,255,0.3)" }}
+              />
             </div>
+            <p style={{ fontSize: "36px", fontWeight: 800, color: "#FFFFFF", marginBottom: "12px", lineHeight: 1.1 }}>
+              {formatNaira(wallet?.virtualBalance ?? 0, false)}
+            </p>
+            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.8)", margin: 0 }}>
+              Converts to real wallet when group savings turn is received
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Row 2 - Payment Methods */}
-      <DashCard title="Payment Methods" actionLabel="Add New" actionHref="#">
-        {mockPaymentMethods.map((pm) => (
-          <div
-            key={pm.id}
-            className={cn("payment-method-item")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-              padding: "16px 0",
-              borderBottom: "1px solid #F1F5F9",
-            }}
+      {/* Payment Methods */}
+      <div className="dash-card mb-4">
+        <div className="card-header">
+          <h3 className="card-title">Payment Methods</h3>
+          <button
+            className="btn btn-outline-primary btn-sm"
+            style={{ fontWeight: 600, borderColor: "#EB5310", color: "#EB5310" }}
           >
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 12,
-                background: "#F1F5F9",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <FontAwesomeIcon
-                icon={faBuildingColumns}
-                style={{ color: "#64748B", fontSize: "1.125rem" }}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div
-                style={{
-                  fontSize: "0.9375rem",
-                  fontWeight: 600,
-                  color: "#1E252F",
-                }}
-              >
-                {pm.bankName}
+            <FontAwesomeIcon icon={faPlus} className="me-1" /> Add Account
+          </button>
+        </div>
+        <div className="row g-3" style={{ padding: "24px" }}>
+          {paymentMethods.map((pm) => (
+            <div className="col-md-4" key={pm.id}>
+              <div style={{ border: "1px solid #F1F5F9", borderRadius: "10px", padding: "20px" }}>
+                <div className="d-flex align-items-center gap-3 mb-3">
+                  <div
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "10px",
+                      background: pm.isDefault ? "#EFF6FF" : "#ECFDF5",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faBuildingColumns}
+                      style={{
+                        fontSize: "18px",
+                        color: pm.isDefault ? "#3B82F6" : "#10B981",
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: "14px", fontWeight: 700, color: "#1E252F", margin: 0 }}>
+                      {pm.bankName}
+                    </p>
+                    <span style={{ fontSize: "13px", color: "#64748B" }}>{pm.accountNumber}</span>
+                  </div>
+                </div>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    color: pm.isDefault ? "#059669" : "#94A3B8",
+                  }}
+                >
+                  {pm.isDefault ? "Default" : "Secondary"}
+                </span>
               </div>
-              <div style={{ fontSize: "0.8125rem", color: "#64748B" }}>
-                {pm.accountName} &middot; {pm.accountNumber}
-              </div>
             </div>
-            {pm.isDefault && (
-              <span
-                style={{
-                  display: "inline-block",
-                  padding: "4px 12px",
-                  borderRadius: 20,
-                  background: "#ECFDF5",
-                  color: "#059669",
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                }}
-              >
-                Default
-              </span>
-            )}
-          </div>
-        ))}
-      </DashCard>
+          ))}
+        </div>
+      </div>
 
-      {/* Row 3 - Transaction History with Filters */}
-      <DashCard title="Transaction History">
-        {/* Filter Bar */}
-        <div
-          className="filter-bar"
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 12,
-            marginBottom: 20,
-            padding: "16px",
-            background: "#F8FAFC",
-            borderRadius: 8,
-          }}
-        >
-          <div style={{ minWidth: 140 }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                color: "#64748B",
-                marginBottom: 4,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-              }}
-            >
-              Type
-            </label>
+      {/* Transaction History */}
+      <div className="dash-card">
+        <div className="card-header">
+          <h3 className="card-title">Transaction History</h3>
+          <div className="d-flex align-items-center gap-2 flex-wrap">
+            <input
+              type="date"
+              className="form-control form-control-sm"
+              style={{ width: "auto", fontSize: "13px" }}
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+            />
+            <input
+              type="date"
+              className="form-control form-control-sm"
+              style={{ width: "auto", fontSize: "13px" }}
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+            />
             <select
               className="form-select form-select-sm"
+              style={{ width: "auto", fontSize: "13px" }}
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              style={{ fontSize: "0.875rem" }}
             >
               <option value="all">All Types</option>
               <option value="deposits">Deposits</option>
               <option value="withdrawals">Withdrawals</option>
+              <option value="transfers">Transfers</option>
               <option value="savings">Savings</option>
-              <option value="group">Group</option>
             </select>
-          </div>
-          <div style={{ minWidth: 140 }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                color: "#64748B",
-                marginBottom: 4,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-              }}
+            <button
+              className="btn btn-outline-secondary btn-sm"
+              style={{ fontWeight: 600, fontSize: "13px" }}
             >
-              Status
-            </label>
-            <select
-              className="form-select form-select-sm"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ fontSize: "0.875rem" }}
-            >
-              <option value="all">All Statuses</option>
-              <option value="completed">Completed</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
-            </select>
-          </div>
-          <div style={{ minWidth: 140 }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                color: "#64748B",
-                marginBottom: 4,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-              }}
-            >
-              From
-            </label>
-            <input
-              type="date"
-              className="form-control form-control-sm"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              style={{ fontSize: "0.875rem" }}
-            />
-          </div>
-          <div style={{ minWidth: 140 }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                color: "#64748B",
-                marginBottom: 4,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-              }}
-            >
-              To
-            </label>
-            <input
-              type="date"
-              className="form-control form-control-sm"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              style={{ fontSize: "0.875rem" }}
-            />
+              <FontAwesomeIcon icon={faDownload} className="me-1" /> Export
+            </button>
           </div>
         </div>
+        <div className="table-responsive">
+          <table className="dash-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Balance After</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTransactions.map((txn) => (
+                <tr key={txn.id}>
+                  <td>{formatDate(txn.createdAt)}</td>
+                  <td>
+                    <strong>{txn.description}</strong>
+                  </td>
+                  <td>
+                    <span className={`status-badge ${getTypeBadgeClass(txn.type)}`}>
+                      {getTypeLabel(txn.type)}
+                    </span>
+                  </td>
+                  <td>{txn.category}</td>
+                  <td className={txn.amount > 0 ? "amount-positive" : "amount-negative"}>
+                    {txn.amount > 0 ? "+" : ""}
+                    {formatNaira(Math.abs(txn.amount), false)}
+                  </td>
+                  <td>{formatNaira(txn.balanceAfter, false)}</td>
+                  <td>
+                    <span className={`status-badge ${getStatusBadgeClass(txn.status)}`}>
+                      {txn.status.charAt(0).toUpperCase() + txn.status.slice(1)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {filteredTransactions.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", padding: "32px 16px", color: "#94A3B8" }}>
+                    No transactions match your filters
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-        {/* Transaction Table */}
-        <DataTable<TransactionRow>
-          columns={[
-            {
-              key: "date",
-              header: "Date",
-              render: (item) => formatDate(item.createdAt),
-            },
-            {
-              key: "description",
-              header: "Description",
-              render: (item) => item.description as string,
-            },
-            {
-              key: "type",
-              header: "Type",
-              render: (item) => getTypeBadge(item.type as string),
-            },
-            {
-              key: "amount",
-              header: "Amount",
-              render: (item) => {
-                const amt = item.amount as number;
-                return (
-                  <span
-                    className={
-                      amt > 0 ? "amount-positive" : "amount-negative"
-                    }
+      {/* ====== DEPOSIT MODAL ====== */}
+      {showDeposit && (
+        <div
+          className="modal fade show"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.75)" }}
+          tabIndex={-1}
+          aria-labelledby="depositModalLabel"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !depositSubmitting) setShowDeposit(false);
+          }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: "16px", border: "none" }}>
+              <div className="modal-header" style={{ borderBottom: "1px solid #F1F5F9", padding: "20px 24px" }}>
+                <h5
+                  className="modal-title"
+                  id="depositModalLabel"
+                  style={{ fontWeight: 700, color: "#1E252F" }}
+                >
+                  Deposit Funds
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={() => setShowDeposit(false)}
+                  disabled={depositSubmitting}
+                />
+              </div>
+              <div className="modal-body" style={{ padding: "24px" }}>
+                {depositError && (
+                  <div className="alert alert-danger" style={{ fontSize: "14px" }}>
+                    {depositError}
+                  </div>
+                )}
+                <div className="mb-3">
+                  <label className="form-label" style={{ fontWeight: 600, fontSize: "14px", color: "#334155" }}>
+                    Amount ({"\u20A6"})
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control form-control-lg"
+                    placeholder="Enter amount"
+                    value={depositAmount}
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                    disabled={depositSubmitting}
+                    min={100}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label" style={{ fontWeight: 600, fontSize: "14px", color: "#334155" }}>
+                    Payment Method
+                  </label>
+                  <select
+                    className="form-select"
+                    value={depositMethodId}
+                    onChange={(e) => setDepositMethodId(e.target.value)}
+                    disabled={depositSubmitting}
                   >
-                    {amt > 0 ? "+" : ""}
-                    {formatNaira(Math.abs(amt), false)}
-                  </span>
-                );
-              },
-            },
-            {
-              key: "balanceAfter",
-              header: "Balance After",
-              render: (item) => formatNaira(item.balanceAfter as number, false),
-            },
-            {
-              key: "status",
-              header: "Status",
-              render: (item) => <StatusBadge status={item.status} />,
-            },
-          ]}
-          data={filteredTransactions}
-          emptyMessage="No transactions match your filters"
-        />
-      </DashCard>
+                    {paymentMethods.map((pm) => (
+                      <option key={pm.id} value={pm.id}>
+                        {pm.bankName} {pm.accountNumber}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer" style={{ borderTop: "1px solid #F1F5F9", padding: "16px 24px" }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowDeposit(false)}
+                  disabled={depositSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ background: "#EB5310", borderColor: "#EB5310", fontWeight: 600 }}
+                  onClick={handleDeposit}
+                  disabled={depositSubmitting}
+                >
+                  {depositSubmitting ? "Processing..." : "Confirm Deposit"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Modals */}
-      <DepositModal
-        isOpen={showDeposit}
-        onClose={() => setShowDeposit(false)}
-      />
-      <WithdrawModal
-        isOpen={showWithdraw}
-        onClose={() => setShowWithdraw(false)}
-        maxAmount={mockWalletSummary.realBalance}
-      />
-    </div>
+      {/* ====== WITHDRAW MODAL ====== */}
+      {showWithdraw && (
+        <div
+          className="modal fade show"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.75)" }}
+          tabIndex={-1}
+          aria-labelledby="withdrawModalLabel"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !withdrawSubmitting) setShowWithdraw(false);
+          }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: "16px", border: "none" }}>
+              <div className="modal-header" style={{ borderBottom: "1px solid #F1F5F9", padding: "20px 24px" }}>
+                <h5
+                  className="modal-title"
+                  id="withdrawModalLabel"
+                  style={{ fontWeight: 700, color: "#1E252F" }}
+                >
+                  Withdraw Funds
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={() => setShowWithdraw(false)}
+                  disabled={withdrawSubmitting}
+                />
+              </div>
+              <div className="modal-body" style={{ padding: "24px" }}>
+                {withdrawError && (
+                  <div className="alert alert-danger" style={{ fontSize: "14px" }}>
+                    {withdrawError}
+                  </div>
+                )}
+                <div className="mb-3">
+                  <label className="form-label" style={{ fontWeight: 600, fontSize: "14px", color: "#334155" }}>
+                    Amount ({"\u20A6"})
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control form-control-lg"
+                    placeholder="Enter amount"
+                    value={withdrawAmount}
+                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                    disabled={withdrawSubmitting}
+                    min={100}
+                  />
+                  <small className="text-muted" style={{ fontSize: "13px" }}>
+                    Available: {formatNaira(wallet?.realBalance ?? 0, false)}
+                  </small>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label" style={{ fontWeight: 600, fontSize: "14px", color: "#334155" }}>
+                    Withdraw To
+                  </label>
+                  <select
+                    className="form-select"
+                    value={withdrawMethodId}
+                    onChange={(e) => setWithdrawMethodId(e.target.value)}
+                    disabled={withdrawSubmitting}
+                  >
+                    {paymentMethods.map((pm) => (
+                      <option key={pm.id} value={pm.id}>
+                        {pm.bankName} {pm.accountNumber}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer" style={{ borderTop: "1px solid #F1F5F9", padding: "16px 24px" }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowWithdraw(false)}
+                  disabled={withdrawSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ background: "#EB5310", borderColor: "#EB5310", fontWeight: 600 }}
+                  onClick={handleWithdraw}
+                  disabled={withdrawSubmitting}
+                >
+                  {withdrawSubmitting ? "Processing..." : "Confirm Withdrawal"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

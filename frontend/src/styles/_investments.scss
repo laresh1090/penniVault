@@ -1,0 +1,249 @@
+// ── Investments Page Styles ──
+
+// Tab Navigation
+.invest-tabs {
+  display: flex;
+  gap: 4px;
+  background: #F1F5F9;
+  border-radius: 12px;
+  padding: 4px;
+  width: fit-content;
+}
+
+.invest-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  background: transparent;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #1E252F;
+  }
+
+  &.active {
+    background: #FFFFFF;
+    color: #1E252F;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// Browse Card
+.invest-browse-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #E2E8F0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.invest-browse-card-img {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.invest-browse-card-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: #CBD5E1;
+}
+
+.invest-browse-category {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(30, 37, 47, 0.85);
+  color: #FFFFFF;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.invest-browse-risk {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.invest-browse-card-body {
+  padding: 16px;
+}
+
+.invest-browse-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E252F;
+  margin: 0 0 4px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.invest-browse-vendor {
+  font-size: 13px;
+  color: #64748B;
+  margin: 0 0 4px;
+  font-weight: 500;
+}
+
+.invest-browse-location {
+  font-size: 13px;
+  color: #94A3B8;
+  margin: 0 0 14px;
+
+  svg {
+    margin-right: 4px;
+    font-size: 11px;
+  }
+}
+
+// Stats row
+.invest-browse-stats {
+  display: flex;
+  gap: 0;
+  margin-bottom: 14px;
+  border: 1px solid #F1F5F9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.invest-browse-stat {
+  flex: 1;
+  text-align: center;
+  padding: 10px 4px;
+
+  &:not(:last-child) {
+    border-right: 1px solid #F1F5F9;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1E252F;
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    display: block;
+    font-size: 11px;
+    color: #94A3B8;
+    margin-top: 2px;
+  }
+}
+
+// Progress
+.invest-browse-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.invest-browse-progress {
+  flex: 1;
+  height: 6px;
+  background: #F1F5F9;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.invest-browse-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #EB5310, #F59E0B);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.invest-browse-progress-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
+  white-space: nowrap;
+}
+
+.invest-browse-amounts {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #94A3B8;
+  margin-bottom: 14px;
+}
+
+// Footer
+.invest-browse-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid #F1F5F9;
+}
+
+.invest-browse-min-label {
+  display: block;
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+.invest-browse-min-value {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E252F;
+}
+
+// ── Responsive ──
+@media (max-width: 767px) {
+  .invest-tabs {
+    width: 100%;
+  }
+
+  .invest-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .invest-browse-card-img {
+    height: 150px;
+  }
+
+  .invest-browse-stat .stat-value {
+    font-size: 13px;
+  }
+}

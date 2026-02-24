@@ -1,0 +1,797 @@
+// ============================================
+// INSTALLMENTS & LISTING DETAIL - Dedicated Styles
+// Accent: #EB5310 (PenniVault brand orange)
+// Dark cards: #1E252F
+// ============================================
+
+// ===========================
+// MARKETPLACE CARD: Installment Badge
+// ===========================
+.marketplace-installment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #FFF3EE;
+  color: #EB5310;
+  margin-bottom: 8px;
+
+  &.disabled {
+    background: #F1F5F9;
+    color: #94A3B8;
+  }
+}
+
+// Installment button variant for marketplace cards
+.quick-action-btn.installment {
+  background: #FFF3EE;
+  color: #EB5310;
+  border: 1px solid #FFDDD0;
+
+  &:hover:not(:disabled) {
+    background: #EB5310;
+    color: #FFFFFF;
+  }
+}
+
+// ===========================
+// LISTING DETAIL MODAL
+// ===========================
+.listing-detail-gallery {
+  position: relative;
+  height: 100%;
+  min-height: 360px;
+  background: #F1F5F9;
+  overflow: hidden;
+}
+
+.listing-detail-img {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  object-fit: cover;
+  display: block;
+}
+
+.listing-detail-img-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F1F5F9;
+  font-size: 64px;
+  color: #CBD5E1;
+}
+
+.listing-gallery-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1E252F;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+
+  &:hover {
+    background: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  }
+
+  &.prev {
+    left: 12px;
+  }
+
+  &.next {
+    right: 12px;
+  }
+}
+
+.listing-gallery-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+
+.listing-gallery-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &.active {
+    background: #FFFFFF;
+    width: 20px;
+    border-radius: 4px;
+  }
+}
+
+.listing-detail-category {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #FFFFFF;
+  background: rgba(235, 83, 16, 0.9);
+}
+
+.listing-detail-info {
+  padding: 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.listing-detail-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #F1F5F9;
+  color: #64748B;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 2;
+
+  &:hover {
+    background: #E2E8F0;
+    color: #1E252F;
+  }
+}
+
+.listing-detail-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1E252F;
+  margin: 0 0 8px;
+  padding-right: 40px;
+  line-height: 1.3;
+}
+
+.listing-detail-price {
+  font-size: 24px;
+  font-weight: 800;
+  color: #EB5310;
+  margin: 0 0 10px;
+}
+
+.listing-detail-location {
+  font-size: 13px;
+  color: #64748B;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  svg {
+    color: #94A3B8;
+  }
+}
+
+.listing-detail-vendor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid #F1F5F9;
+  border-bottom: 1px solid #F1F5F9;
+  margin-bottom: 14px;
+}
+
+.listing-detail-vendor-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #EFF6FF;
+  color: #3B82F6;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.listing-detail-vendor-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1E252F;
+}
+
+.listing-detail-vendor-label {
+  display: block;
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+.listing-detail-desc {
+  font-size: 13px;
+  color: #64748B;
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+
+.listing-detail-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.listing-detail-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 10px;
+  background: #F8FAFC;
+  border-radius: 8px;
+}
+
+.listing-detail-meta-label {
+  font-size: 11px;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.listing-detail-meta-value {
+  font-size: 13px;
+  color: #1E252F;
+  font-weight: 600;
+}
+
+.listing-detail-stock {
+  font-size: 13px;
+  color: #64748B;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+
+  svg {
+    color: #94A3B8;
+  }
+}
+
+// ===========================
+// LISTING DETAIL: Installment Section (always visible)
+// ===========================
+.listing-detail-installment-section {
+  border-radius: 12px;
+  background: #FFF8F5;
+  border: 1px solid #FFDDD0;
+  margin-bottom: 16px;
+  overflow: hidden;
+
+  &.disabled {
+    background: #F8FAFC;
+    border-color: #E2E8F0;
+
+    .listing-detail-installment-header {
+      color: #94A3B8;
+
+      svg {
+        color: #CBD5E1;
+      }
+    }
+  }
+}
+
+.listing-detail-installment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #EB5310;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+  svg {
+    font-size: 14px;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+.listing-detail-installment-body {
+  padding: 10px 14px 12px;
+}
+
+.listing-detail-installment-preview {
+  font-size: 13px;
+  color: #334155;
+  margin: 0 0 8px;
+  line-height: 1.5;
+
+  strong {
+    color: #EB5310;
+  }
+}
+
+.listing-detail-installment-steps {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: #64748B;
+  line-height: 1.8;
+
+  li {
+    margin-bottom: 2px;
+  }
+}
+
+.listing-detail-installment-unavailable {
+  font-size: 13px;
+  color: #94A3B8;
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+
+.listing-detail-installment-hint {
+  font-size: 12px;
+  color: #CBD5E1;
+  margin: 0;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.listing-detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.listing-detail-buy-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 12px 20px !important;
+  font-size: 14px !important;
+}
+
+.listing-detail-installment-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 12px 20px !important;
+  font-size: 14px !important;
+
+  &.outline {
+    border-color: #EB5310 !important;
+    color: #EB5310 !important;
+
+    &:hover {
+      background: #EB5310 !important;
+      color: #FFFFFF !important;
+    }
+  }
+
+  &:disabled {
+    border-color: #E2E8F0 !important;
+    color: #CBD5E1 !important;
+    background: #F8FAFC !important;
+  }
+}
+
+// ===========================
+// INSTALLMENT PURCHASE MODAL: Step Bar
+// ===========================
+.installment-step-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 0;
+  margin-bottom: 8px;
+}
+
+.installment-step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #E2E8F0;
+  transition: all 0.25s ease;
+
+  &.active {
+    background: #EB5310;
+  }
+
+  &.current {
+    width: 28px;
+    border-radius: 10px;
+    background: #EB5310;
+  }
+}
+
+// ===========================
+// INSTALLMENT PURCHASE: Item Summary
+// ===========================
+.installment-item-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.installment-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: 14px;
+    color: #1E252F;
+  }
+}
+
+.installment-item-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E252F;
+}
+
+// ===========================
+// PLAN SELECTION CARDS
+// ===========================
+.installment-plan-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.installment-plan-card {
+  border: 2px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 20px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+
+  &:hover {
+    border-color: #CBD5E1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  &.selected {
+    border-color: #EB5310;
+    background: #FFF8F5;
+    box-shadow: 0 0 0 3px rgba(235, 83, 16, 0.12);
+  }
+}
+
+.installment-plan-duration {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E252F;
+  margin-bottom: 12px;
+}
+
+.installment-plan-monthly {
+  display: block;
+  font-size: 20px;
+  font-weight: 800;
+  color: #EB5310;
+  margin-bottom: 4px;
+}
+
+.installment-plan-markup {
+  display: block;
+  font-size: 12px;
+  color: #94A3B8;
+  margin-bottom: 2px;
+}
+
+.installment-plan-total {
+  display: block;
+  font-size: 12px;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.installment-plan-loading {
+  display: block;
+  font-size: 13px;
+  color: #94A3B8;
+  padding: 12px 0;
+}
+
+// ===========================
+// COST BREAKDOWN
+// ===========================
+.installment-breakdown {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.installment-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 13px;
+  color: #64748B;
+
+  span:last-child {
+    font-weight: 600;
+    color: #334155;
+  }
+
+  &.highlight {
+    span:last-child {
+      color: #EB5310;
+      font-weight: 700;
+    }
+  }
+
+  &.total {
+    border-top: 2px solid #1E252F;
+    margin-top: 4px;
+    padding-top: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1E252F;
+
+    span:last-child {
+      color: #1E252F;
+      font-weight: 800;
+    }
+  }
+}
+
+// ===========================
+// FUNDING SOURCE
+// ===========================
+.installment-funding-source {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+}
+
+.installment-wallet-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #334155;
+  padding: 4px 0;
+
+  span:last-child {
+    font-weight: 600;
+  }
+}
+
+.installment-insufficient {
+  color: #EF4444;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 4px 0 0;
+}
+
+// ===========================
+// CONFIRM STEP
+// ===========================
+.installment-confirm-details {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.installment-confirm-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #334155;
+
+  span:first-child {
+    color: #64748B;
+  }
+
+  span:last-child {
+    font-weight: 600;
+  }
+}
+
+// ===========================
+// MY INSTALLMENTS PAGE: Plan Cards
+// ===========================
+.installment-plan-card-page {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+  }
+
+  &.overdue {
+    border-color: #FECACA;
+
+    .installment-card-progress-fill {
+      background: #EF4444 !important;
+    }
+  }
+
+  &.completed {
+    .installment-card-progress-fill {
+      background: #059669 !important;
+    }
+  }
+}
+
+.installment-card-img {
+  position: relative;
+  height: 140px;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.installment-card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F1F5F9;
+  color: #CBD5E1;
+  font-size: 40px;
+}
+
+.installment-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E252F;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.installment-card-progress {
+  margin: 12px 0;
+}
+
+.installment-card-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #E2E8F0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.installment-card-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: #EB5310;
+  transition: width 0.5s ease;
+}
+
+.installment-card-progress-text {
+  display: block;
+  font-size: 11px;
+  color: #94A3B8;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.installment-card-amounts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+}
+
+.installment-card-amount-label {
+  font-size: 11px;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.installment-card-amount-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1E252F;
+}
+
+.installment-card-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #F1F5F9;
+}
+
+// ===========================
+// RESPONSIVE
+// ===========================
+@media (max-width: 768px) {
+  .installment-plan-options {
+    grid-template-columns: 1fr;
+  }
+
+  .installment-plan-card-page {
+    .installment-card-img {
+      height: 120px;
+    }
+  }
+
+  .listing-detail-gallery {
+    min-height: 240px;
+  }
+
+  .listing-detail-img,
+  .listing-detail-img-placeholder {
+    min-height: 240px;
+  }
+
+  .listing-detail-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}

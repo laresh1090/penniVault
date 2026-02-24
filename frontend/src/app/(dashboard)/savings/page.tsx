@@ -2,23 +2,73 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faPause, faPlay, faArrowUp } from "@fortawesome/free-solid-svg-icons";
-import QuickActionBtn from "@/components/ui/QuickActionBtn";
-import StatusBadge from "@/components/ui/StatusBadge";
-import { mockSavingsPlans } from "@/data/savings";
-import { formatNaira, formatDate, formatPercentage } from "@/lib/formatters";
-import type { SavingsStatus } from "@/types/common";
+import {
+  faPlus,
+  faLock,
+  faUnlock,
+  faPercent,
+  faTriangleExclamation,
+} from "@fortawesome/free-solid-svg-icons";
+import { useSavingsPlans } from "@/hooks";
+import { formatNaira, formatDate } from "@/lib/formatters";
+import type { SavingsProductType } from "@/types/common";
+import PenniSaveLayout from "@/components/savings/PenniSaveLayout";
+import CreatePenniSaveModal from "@/components/savings/CreatePenniSaveModal";
+import QuickSaveModal from "@/components/savings/QuickSaveModal";
+import WithdrawPenniSaveModal from "@/components/savings/WithdrawPenniSaveModal";
+import PenniLockLayout from "@/components/savings/PenniLockLayout";
+import CreatePenniLockModal from "@/components/savings/CreatePenniLockModal";
+import BreakLockModal from "@/components/savings/BreakLockModal";
+import TargetSaveLayout from "@/components/savings/TargetSaveLayout";
+import CreateTargetSaveModal from "@/components/savings/CreateTargetSaveModal";
 
-type FilterStatus = "all" | SavingsStatus;
+type FilterStatus = "all" | "active" | "completed" | "paused";
+
+const PRODUCT_LABELS: Record<SavingsProductType, string> = {
+  pennisave: "PenniSave",
+  pennilock: "PenniLock",
+  targetsave: "TargetSave",
+  penniajo: "PenniAjo",
+};
+
+const PRODUCT_COLORS: Record<SavingsProductType, string> = {
+  pennisave: "#3B82F6",
+  pennilock: "#10B981",
+  targetsave: "#8B5CF6",
+  penniajo: "#EB5310",
+};
 
 export default function SavingsPage() {
+  const searchParams = useSearchParams();
+  const typeFilter = searchParams.get("type") as SavingsProductType | null;
   const [activeFilter, setActiveFilter] = useState<FilterStatus>("all");
 
+  // PenniSave modal state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [quickSavePlanId, setQuickSavePlanId] = useState<string | null>(null);
+  const [withdrawPlanId, setWithdrawPlanId] = useState<string | null>(null);
+
+  // PenniLock modal state
+  const [showCreateLockModal, setShowCreateLockModal] = useState(false);
+  const [breakLockPlanId, setBreakLockPlanId] = useState<string | null>(null);
+
+  // TargetSave modal state
+  const [showCreateTargetModal, setShowCreateTargetModal] = useState(false);
+
+  const { plans: allPlans, isLoading, error, refetch } = useSavingsPlans();
+
   const filteredPlans = useMemo(() => {
-    if (activeFilter === "all") return mockSavingsPlans;
-    return mockSavingsPlans.filter((plan) => plan.status === activeFilter);
-  }, [activeFilter]);
+    let plans = allPlans;
+    if (typeFilter) {
+      plans = plans.filter((p) => p.productType === typeFilter);
+    }
+    if (activeFilter !== "all") {
+      plans = plans.filter((p) => p.status === activeFilter);
+    }
+    return plans;
+  }, [allPlans, activeFilter, typeFilter]);
 
   const filterOptions: { label: string; value: FilterStatus }[] = [
     { label: "All", value: "all" },
@@ -27,39 +77,131 @@ export default function SavingsPage() {
     { label: "Paused", value: "paused" },
   ];
 
-  function getNextContributionDate(plan: typeof mockSavingsPlans[0]): string {
-    const start = new Date(plan.startDate);
-    const now = new Date();
-    const next = new Date(start);
+  const pageTitle = typeFilter ? PRODUCT_LABELS[typeFilter] : "Savings Plans";
 
-    while (next <= now) {
-      switch (plan.frequency) {
-        case "daily":
-          next.setDate(next.getDate() + 1);
-          break;
-        case "weekly":
-          next.setDate(next.getDate() + 7);
-          break;
-        case "biweekly":
-          next.setDate(next.getDate() + 14);
-          break;
-        case "monthly":
-          next.setMonth(next.getMonth() + 1);
-          break;
-      }
-    }
+  // PenniSave dedicated layout
+  if (typeFilter === "pennisave") {
+    const pennisavePlans = allPlans.filter(
+      (p) => p.productType === "pennisave"
+    );
+    return (
+      <>
+        <PenniSaveLayout
+          plans={pennisavePlans}
+          onCreateNew={() => setShowCreateModal(true)}
+          onQuickSave={(id) => setQuickSavePlanId(id)}
+          onWithdraw={(id) => setWithdrawPlanId(id)}
+        />
+        {showCreateModal && (
+          <CreatePenniSaveModal
+            onClose={() => setShowCreateModal(false)}
+            onSuccess={() => refetch()}
+          />
+        )}
+        {quickSavePlanId && (() => {
+          const qsPlan = allPlans.find((p) => p.id === quickSavePlanId);
+          return qsPlan ? (
+            <QuickSaveModal
+              plan={qsPlan}
+              onClose={() => setQuickSavePlanId(null)}
+              onSuccess={() => refetch()}
+            />
+          ) : null;
+        })()}
+        {withdrawPlanId && (() => {
+          const wdPlan = allPlans.find((p) => p.id === withdrawPlanId);
+          return wdPlan ? (
+            <WithdrawPenniSaveModal
+              plan={wdPlan}
+              onClose={() => setWithdrawPlanId(null)}
+              onSuccess={() => refetch()}
+            />
+          ) : null;
+        })()}
+      </>
+    );
+  }
 
-    return formatDate(next.toISOString());
+  // PenniLock dedicated layout
+  if (typeFilter === "pennilock") {
+    const pennilockPlans = allPlans.filter(
+      (p) => p.productType === "pennilock"
+    );
+    const breakLockPlan = breakLockPlanId
+      ? allPlans.find((p) => p.id === breakLockPlanId)
+      : null;
+    return (
+      <>
+        <PenniLockLayout
+          plans={pennilockPlans}
+          onCreateNew={() => setShowCreateLockModal(true)}
+          onBreakLock={(id) => setBreakLockPlanId(id)}
+        />
+        {showCreateLockModal && (
+          <CreatePenniLockModal
+            onClose={() => setShowCreateLockModal(false)}
+            onSuccess={() => refetch()}
+          />
+        )}
+        {breakLockPlan && (
+          <BreakLockModal
+            plan={breakLockPlan}
+            onClose={() => setBreakLockPlanId(null)}
+            onConfirm={() => refetch()}
+          />
+        )}
+      </>
+    );
+  }
+
+  // TargetSave dedicated layout
+  if (typeFilter === "targetsave") {
+    const targetsavePlans = allPlans.filter(
+      (p) => p.productType === "targetsave"
+    );
+    return (
+      <>
+        <TargetSaveLayout
+          plans={targetsavePlans}
+          onCreateNew={() => setShowCreateTargetModal(true)}
+          onAddFunds={() => {}}
+          onWithdraw={() => {}}
+        />
+        {showCreateTargetModal && (
+          <CreateTargetSaveModal
+            onClose={() => setShowCreateTargetModal(false)}
+            onSuccess={() => refetch()}
+          />
+        )}
+      </>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ padding: "60px 0" }}>
+        <div className="spinner-border text-primary" role="status" style={{ color: "#EB5310" }}>
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
+    <>
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Savings Plans</h2>
-        <QuickActionBtn variant="primary" icon={faPlus} href="/savings/new">
-          New Savings Plan
-        </QuickActionBtn>
+        <div>
+          <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>{pageTitle}</h2>
+          {typeFilter && (
+            <Link href="/savings" style={{ fontSize: 13, color: "#64748B" }}>
+              View all savings
+            </Link>
+          )}
+        </div>
+        <Link href="#" className="quick-action-btn primary" style={{ fontSize: 13, padding: "8px 16px" }}>
+          <FontAwesomeIcon icon={faPlus} /> New Plan
+        </Link>
       </div>
 
       {/* Filter Bar */}
@@ -68,11 +210,7 @@ export default function SavingsPage() {
           <button
             key={option.value}
             type="button"
-            className={`btn btn-sm ${
-              activeFilter === option.value
-                ? "btn-primary"
-                : "btn-outline-secondary"
-            }`}
+            className={`btn btn-sm ${activeFilter === option.value ? "btn-primary" : "btn-outline-secondary"}`}
             style={{
               borderRadius: 20,
               paddingLeft: 16,
@@ -90,223 +228,139 @@ export default function SavingsPage() {
         ))}
       </div>
 
-      {/* Plan Cards Grid */}
-      <div className="row g-4">
-        {filteredPlans.length === 0 ? (
-          <div className="col-12">
-            <div
-              className="card p-5 text-center"
-              style={{ borderRadius: 12, border: "1px solid #E2E8F0" }}
-            >
-              <p style={{ color: "#64748B", fontSize: 15, margin: 0 }}>
-                No savings plans found for the selected filter.
-              </p>
-            </div>
-          </div>
-        ) : (
-          filteredPlans.map((plan) => {
-            const percentage = Math.round(
-              (plan.currentAmount / plan.targetAmount) * 100
-            );
-            const statusForBadge = plan.status as
-              | "active"
-              | "completed"
-              | "paused"
-              | "pending";
+      {/* Savings Plans Cards */}
+      {filteredPlans.length === 0 ? (
+        <div className="dash-card" style={{ textAlign: "center", padding: "40px 20px" }}>
+          <p style={{ color: "#64748B", fontSize: 15, margin: 0 }}>
+            No savings plans found for the selected filter.
+          </p>
+        </div>
+      ) : (
+        <div className="row g-3">
+          {filteredPlans.map((plan) => {
+            const pct = plan.targetAmount > 0
+              ? Math.round((plan.currentAmount / plan.targetAmount) * 100)
+              : 0;
+            const productColor = PRODUCT_COLORS[plan.productType];
 
             return (
               <div key={plan.id} className="col-md-6">
-                <div
-                  className="card h-100"
-                  style={{
-                    borderRadius: 12,
-                    border: "1px solid #E2E8F0",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div className="card-body p-4">
-                    {/* Plan Name + Status */}
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <h5
-                        style={{
-                          fontSize: 17,
-                          fontWeight: 700,
-                          margin: 0,
-                          color: "#1E293B",
-                        }}
+                <div className="savings-plan-card">
+                  {/* Card Header */}
+                  <div className="savings-plan-card-header">
+                    <div>
+                      <span
+                        className="savings-product-tag"
+                        style={{ background: `${productColor}15`, color: productColor }}
                       >
-                        {plan.name}
-                      </h5>
-                      <StatusBadge status={statusForBadge} />
+                        {PRODUCT_LABELS[plan.productType]}
+                      </span>
+                      <h4 className="savings-plan-name">{plan.name}</h4>
+                      {plan.description && (
+                        <p className="savings-plan-desc">{plan.description}</p>
+                      )}
                     </div>
+                    <span className={`status-badge ${plan.status}`}>
+                      {plan.status.charAt(0).toUpperCase() + plan.status.slice(1)}
+                    </span>
+                  </div>
 
-                    {/* Description */}
-                    {plan.description && (
-                      <p
-                        style={{
-                          fontSize: 13,
-                          color: "#64748B",
-                          marginBottom: 16,
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {plan.description}
-                      </p>
+                  {/* Balance */}
+                  <div className="savings-plan-balance">
+                    <span className="balance-value">{formatNaira(plan.currentAmount, false)}</span>
+                    {plan.targetAmount > 0 && (
+                      <span className="balance-target"> / {formatNaira(plan.targetAmount, false)}</span>
                     )}
+                  </div>
 
-                    {/* Progress Bar */}
-                    <div className="mb-2">
-                      <div
-                        style={{
-                          height: 8,
-                          backgroundColor: "#E2E8F0",
-                          borderRadius: 4,
-                          overflow: "hidden",
-                        }}
-                      >
+                  {/* Progress */}
+                  {plan.targetAmount > 0 && (
+                    <>
+                      <div className="savings-progress" style={{ marginBottom: 12 }}>
                         <div
-                          style={{
-                            height: "100%",
-                            width: `${Math.min(percentage, 100)}%`,
-                            backgroundColor:
-                              percentage >= 100 ? "#22C55E" : "#EB5310",
-                            borderRadius: 4,
-                            transition: "width 0.4s ease",
-                          }}
+                          className="progress-fill"
+                          style={{ width: `${pct}%`, background: productColor }}
                         />
                       </div>
-                      <div
-                        className="d-flex justify-content-between mt-1"
-                        style={{ fontSize: 12, color: "#64748B" }}
-                      >
-                        <span>{percentage}% complete</span>
-                      </div>
-                    </div>
-
-                    {/* Amount */}
-                    <p
-                      style={{
-                        fontSize: 14,
-                        color: "#334155",
-                        fontWeight: 600,
-                        marginBottom: 12,
-                      }}
-                    >
-                      {formatNaira(plan.currentAmount, false)} of{" "}
-                      {formatNaira(plan.targetAmount, false)}
-                    </p>
-
-                    {/* Detail Rows */}
-                    <div
-                      className="d-flex gap-3 flex-wrap mb-3"
-                      style={{ fontSize: 13, color: "#64748B" }}
-                    >
-                      <span>
-                        <strong style={{ color: "#334155" }}>Frequency:</strong>{" "}
-                        {plan.frequency.charAt(0).toUpperCase() +
-                          plan.frequency.slice(1)}
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "#64748B" }}>
+                        {pct}% of target reached
                       </span>
-                      {plan.interestRate !== undefined && (
-                        <span>
-                          <strong style={{ color: "#334155" }}>Rate:</strong>{" "}
-                          {formatPercentage(plan.interestRate, 0)}
-                        </span>
-                      )}
-                    </div>
+                    </>
+                  )}
 
-                    {/* Next Contribution */}
-                    {plan.status === "active" && (
-                      <p
-                        style={{
-                          fontSize: 13,
-                          color: "#64748B",
-                          marginBottom: 16,
-                        }}
-                      >
-                        Next:{" "}
-                        <strong style={{ color: "#334155" }}>
-                          {formatNaira(plan.contributionAmount, false)}
-                        </strong>{" "}
-                        due {getNextContributionDate(plan)}
-                      </p>
+                  {/* Info Tags */}
+                  <div className="savings-plan-tags">
+                    {plan.hasInterest ? (
+                      <span className="savings-tag interest">
+                        <FontAwesomeIcon icon={faPercent} />
+                        {plan.interestRate}% p.a.
+                        {plan.accruedInterest > 0 && (
+                          <> &middot; Earned {formatNaira(plan.accruedInterest, false)}</>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="savings-tag no-interest">No interest</span>
                     )}
+                    <span className={`savings-tag ${plan.isFixedTerm ? "locked" : "flexible"}`}>
+                      <FontAwesomeIcon icon={plan.isFixedTerm ? faLock : faUnlock} />
+                      {plan.isFixedTerm ? "Fixed term" : "Flexible"}
+                    </span>
+                    {plan.earlyWithdrawalPenaltyPercent > 0 && (
+                      <span className="savings-tag penalty">
+                        <FontAwesomeIcon icon={faTriangleExclamation} />
+                        {plan.earlyWithdrawalPenaltyPercent}% early withdrawal penalty
+                      </span>
+                    )}
+                  </div>
 
-                    {/* Action Buttons */}
-                    <div className="d-flex gap-2 flex-wrap">
-                      <Link
-                        href={`/savings/${plan.id}`}
-                        className="btn btn-sm"
-                        style={{
-                          backgroundColor: "#EB5310",
-                          color: "#fff",
-                          borderRadius: 8,
-                          fontSize: 13,
-                          fontWeight: 600,
-                          paddingLeft: 16,
-                          paddingRight: 16,
-                        }}
-                      >
-                        View Details
-                      </Link>
-                      {plan.status === "active" && (
-                        <>
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-outline-secondary"
-                            style={{
-                              borderRadius: 8,
-                              fontSize: 13,
-                              fontWeight: 600,
-                            }}
-                          >
-                            <FontAwesomeIcon
-                              icon={faArrowUp}
-                              style={{ marginRight: 4 }}
-                            />
-                            Add Funds
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-outline-secondary"
-                            style={{
-                              borderRadius: 8,
-                              fontSize: 13,
-                              fontWeight: 600,
-                            }}
-                          >
-                            <FontAwesomeIcon
-                              icon={faPause}
-                              style={{ marginRight: 4 }}
-                            />
-                            Pause
-                          </button>
-                        </>
-                      )}
-                      {plan.status === "paused" && (
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-outline-success"
-                          style={{
-                            borderRadius: 8,
-                            fontSize: 13,
-                            fontWeight: 600,
-                          }}
-                        >
-                          <FontAwesomeIcon
-                            icon={faPlay}
-                            style={{ marginRight: 4 }}
-                          />
-                          Resume
-                        </button>
-                      )}
+                  {/* Details Row */}
+                  <div className="savings-plan-details">
+                    <div className="detail-item">
+                      <span className="detail-label">Frequency</span>
+                      <span className="detail-value">
+                        {plan.frequency.charAt(0).toUpperCase() + plan.frequency.slice(1)}
+                      </span>
                     </div>
+                    <div className="detail-item">
+                      <span className="detail-label">Contribution</span>
+                      <span className="detail-value">{formatNaira(plan.contributionAmount, false)}</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="detail-label">Started</span>
+                      <span className="detail-value">{formatDate(plan.startDate)}</span>
+                    </div>
+                    {plan.endDate && (
+                      <div className="detail-item">
+                        <span className="detail-label">{plan.isFixedTerm ? "Unlocks" : "Target Date"}</span>
+                        <span className="detail-value">{formatDate(plan.endDate)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="savings-plan-actions">
+                    <Link
+                      href={`/savings/${plan.id}`}
+                      className="quick-action-btn outline"
+                      style={{ fontSize: 13, padding: "6px 16px" }}
+                    >
+                      View Details
+                    </Link>
+                    {plan.status === "active" && (
+                      <button
+                        className="quick-action-btn primary"
+                        style={{ fontSize: 13, padding: "6px 16px" }}
+                      >
+                        {plan.isFixedTerm ? "Top Up" : "Withdraw"}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
             );
-          })
-        )}
-      </div>
-    </div>
+          })}
+        </div>
+      )}
+    </>
   );
 }

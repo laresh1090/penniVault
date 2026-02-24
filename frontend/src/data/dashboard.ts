@@ -401,6 +401,37 @@ export const mockSavingsPlanDetail: SavingsPlanDetail = {
   ],
 };
 
+export const mockPenniLockDetail: SavingsPlanDetail = {
+  id: "sav_009",
+  name: "Q2 Business Capital",
+  description: "Locked for 90 days at 12% annual interest. Interest credited at maturity.",
+  productType: "pennilock",
+  targetAmount: 2000000,
+  currentAmount: 2000000,
+  startDate: "2026-01-15",
+  endDate: "2026-04-15",
+  frequency: "One-time lock",
+  contributionAmount: 0,
+  status: "active",
+  interestRate: 12,
+  transactions: [
+    {
+      id: "txn_pl001",
+      date: "2026-01-15",
+      amount: 2000000,
+      type: "lock_creation",
+      status: "completed",
+    },
+    {
+      id: "txn_pl002",
+      date: "2026-02-15",
+      amount: 19726,
+      type: "interest_accrual",
+      status: "completed",
+    },
+  ],
+};
+
 export const mockGroupSavingsDetail: GroupSavingsDetail = {
   id: "grp_001",
   name: "HomeOwners Circle",

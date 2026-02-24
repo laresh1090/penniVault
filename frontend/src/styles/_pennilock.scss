@@ -1,0 +1,835 @@
+// frontend/src/styles/_pennilock.scss
+
+// ─── Variables ───
+$pennilock-accent: #10B981;
+$pennilock-accent-light: #ECFDF5;
+$pennilock-accent-dark: #065F46;
+$pennilock-danger: #EF4444;
+$pennilock-danger-light: #FEF2F2;
+$pennilock-warning: #F59E0B;
+
+// ─── Page Layout ───
+.pennilock-page-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1E252F;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pennilock-title-icon {
+  color: $pennilock-accent;
+  font-size: 22px;
+}
+
+.pennilock-page-subtitle {
+  font-size: 14px;
+  color: #64748B;
+  margin: 4px 0 0;
+}
+
+// ─── Summary Card ───
+.pennilock-summary-card {
+  background: linear-gradient(135deg, $pennilock-accent 0%, $pennilock-accent-dark 100%);
+  border-radius: 16px;
+  padding: 24px 28px;
+  color: #FFFFFF;
+  margin-bottom: 24px;
+
+  .summary-label {
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+
+  .summary-value {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .summary-stat {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.9;
+  }
+}
+
+// ─── Filter Pills ───
+.pennilock-filter-pill {
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $pennilock-accent;
+    color: $pennilock-accent;
+  }
+
+  &.active {
+    background: $pennilock-accent;
+    border-color: $pennilock-accent;
+    color: #FFFFFF;
+  }
+}
+
+// ─── Plan Card ───
+.pennilock-card {
+  background: #FFFFFF;
+  border-radius: 14px;
+  border: 1px solid #F1F5F9;
+  padding: 20px;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+
+  &.completed {
+    opacity: 0.75;
+    border-color: #E2E8F0;
+  }
+
+  &.mature {
+    border-color: $pennilock-accent;
+    box-shadow: 0 0 0 1px $pennilock-accent;
+  }
+}
+
+// ─── Card Header ───
+.pennilock-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.pennilock-product-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: $pennilock-accent;
+  background: $pennilock-accent-light;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.pennilock-card-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E252F;
+  margin: 0;
+}
+
+// ─── Card Balance ───
+.pennilock-card-balance {
+  margin-bottom: 12px;
+}
+
+.pennilock-locked-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94A3B8;
+  margin-bottom: 2px;
+}
+
+.pennilock-locked-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1E252F;
+}
+
+// ─── Rate / Mode Badges ───
+.pennilock-rate-badge {
+  display: inline-block;
+  background: $pennilock-accent-light;
+  color: $pennilock-accent;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.pennilock-interest-earned {
+  font-size: 12px;
+  font-weight: 600;
+  color: $pennilock-accent;
+}
+
+.pennilock-mode-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  &.upfront {
+    background: #FEF3C7;
+    color: #92400E;
+  }
+
+  &.maturity {
+    background: #EFF6FF;
+    color: #1E40AF;
+  }
+}
+
+// ─── Maturity Progress ───
+.pennilock-maturity-section {
+  margin-bottom: 16px;
+}
+
+.pennilock-progress {
+  height: 6px;
+  background: #E2E8F0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pennilock-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, $pennilock-accent, #0E9F6E);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.pennilock-countdown {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pennilock-countdown-days {
+  color: #64748B;
+}
+
+.pennilock-countdown-mature {
+  color: $pennilock-accent;
+}
+
+// ─── Card Actions ───
+.pennilock-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #F1F5F9;
+}
+
+.pennilock-withdraw-btn {
+  background: $pennilock-accent !important;
+  border-color: $pennilock-accent !important;
+}
+
+// ─── Create Modal ───
+.pennilock-modal-header {
+  border-bottom: 1px solid #F1F5F9;
+  padding: 20px 24px;
+}
+
+.pennilock-modal-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: $pennilock-accent-light;
+  color: $pennilock-accent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+// ─── Step Progress ───
+.pennilock-step-progress {
+  height: 3px;
+  background: #E2E8F0;
+}
+
+.pennilock-step-progress-fill {
+  height: 100%;
+  background: $pennilock-accent;
+  transition: width 0.3s ease;
+}
+
+.pennilock-step-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E252F;
+  margin-bottom: 6px;
+}
+
+.pennilock-step-subtitle {
+  font-size: 14px;
+  color: #64748B;
+  margin-bottom: 20px;
+}
+
+.pennilock-modal-footer {
+  border-top: 1px solid #F1F5F9;
+  padding: 16px 24px;
+}
+
+.pennilock-btn-primary {
+  background: $pennilock-accent;
+  border-color: $pennilock-accent;
+  color: #FFFFFF;
+  font-weight: 600;
+
+  &:hover {
+    background: #0E9F6E;
+    border-color: #0E9F6E;
+  }
+
+  &:disabled {
+    background: #94A3B8;
+    border-color: #94A3B8;
+  }
+}
+
+// ─── Duration Presets ───
+.pennilock-duration-presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.pennilock-duration-btn {
+  border: 2px solid #E2E8F0;
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $pennilock-accent;
+  }
+
+  &.active {
+    border-color: $pennilock-accent;
+    background: $pennilock-accent-light;
+  }
+
+  .pennilock-duration-days {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1E252F;
+  }
+
+  .pennilock-duration-rate {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: $pennilock-accent;
+    margin-top: 2px;
+  }
+}
+
+// ─── Rate Preview ───
+.pennilock-rate-preview {
+  background: $pennilock-accent-light;
+  border: 1px solid rgba($pennilock-accent, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.pennilock-rate-preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 14px;
+
+  span { color: #64748B; }
+  strong { color: #1E252F; }
+}
+
+.pennilock-rate-value {
+  color: $pennilock-accent !important;
+  font-size: 16px !important;
+}
+
+// ─── Tiers Table ───
+.pennilock-tiers-table {
+  margin-top: 16px;
+  border: 1px solid #F1F5F9;
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.pennilock-tiers-heading {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94A3B8;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.pennilock-tiers-table table {
+  width: 100%;
+
+  td {
+    padding: 4px 0;
+    font-size: 13px;
+    color: #64748B;
+  }
+
+  .active-tier td {
+    color: $pennilock-accent;
+    font-weight: 700;
+  }
+}
+
+// ─── Interest Preview (Step 2) ───
+.pennilock-interest-preview {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.pennilock-interest-preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+
+  span { color: #64748B; }
+  strong { color: #1E252F; }
+
+  &.total {
+    span, strong { font-size: 16px; font-weight: 800; color: #1E252F; }
+  }
+}
+
+.pennilock-interest-value {
+  color: $pennilock-accent !important;
+}
+
+// ─── Funding Source Options ───
+.pennilock-funding-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pennilock-funding-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 2px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  input[type="radio"] {
+    accent-color: $pennilock-accent;
+    width: 18px;
+    height: 18px;
+  }
+
+  &.selected {
+    border-color: $pennilock-accent;
+    background: $pennilock-accent-light;
+  }
+}
+
+.pennilock-funding-info {
+  flex: 1;
+
+  strong {
+    display: block;
+    font-size: 14px;
+    color: #1E252F;
+  }
+
+  span {
+    font-size: 13px;
+    color: #64748B;
+  }
+}
+
+.pennilock-funding-insufficient {
+  font-size: 12px;
+  font-weight: 700;
+  color: $pennilock-danger;
+  background: $pennilock-danger-light;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+// ─── Review Card (Step 5) ───
+.pennilock-review-card {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.pennilock-review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+
+  span { color: #64748B; }
+  strong { color: #1E252F; }
+
+  &.total {
+    padding-top: 12px;
+    span { font-weight: 700; color: #1E252F; }
+    strong { font-size: 18px; font-weight: 800; }
+  }
+}
+
+// ─── Callouts ───
+.pennilock-callout {
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+  margin-top: 16px;
+  line-height: 1.5;
+
+  &.warning {
+    background: #FEF3C7;
+    border: 1px solid #FDE68A;
+    color: #92400E;
+
+    strong { color: #78350F; }
+  }
+
+  &.info {
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    color: #1E40AF;
+
+    strong { color: #1E3A8A; }
+  }
+}
+
+// ─── Interest Mode Toggle ───
+.pennilock-interest-mode-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pennilock-mode-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 2px solid #E2E8F0;
+  background: #FFFFFF;
+  border-radius: 14px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $pennilock-accent;
+  }
+
+  &.active {
+    border-color: $pennilock-accent;
+    background: $pennilock-accent-light;
+    box-shadow: 0 0 0 1px $pennilock-accent;
+  }
+}
+
+.pennilock-mode-option-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+
+  strong {
+    font-size: 15px;
+    color: #1E252F;
+  }
+}
+
+.pennilock-mode-icon {
+  color: $pennilock-accent;
+  font-size: 18px;
+}
+
+.pennilock-mode-option-desc {
+  font-size: 13px;
+  color: #64748B;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.pennilock-mode-callout {
+  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+
+  &.upfront {
+    background: #FEF3C7;
+    color: #92400E;
+  }
+
+  &.maturity {
+    background: #EFF6FF;
+    color: #1E40AF;
+  }
+}
+
+// ─── Detail Page: Countdown Card ───
+.pennilock-countdown-card {
+  text-align: center;
+}
+
+.pennilock-countdown-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.pennilock-countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 56px;
+}
+
+.pennilock-countdown-number {
+  font-size: 32px;
+  font-weight: 800;
+  color: $pennilock-accent;
+  line-height: 1.1;
+}
+
+.pennilock-countdown-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94A3B8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pennilock-countdown-separator {
+  font-size: 28px;
+  font-weight: 800;
+  color: #CBD5E1;
+  line-height: 1;
+  padding-bottom: 14px;
+}
+
+.pennilock-countdown-expired {
+  padding: 20px;
+  color: $pennilock-accent;
+
+  svg {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+
+  span {
+    display: block;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  p {
+    font-size: 14px;
+    color: #64748B;
+    margin: 0;
+  }
+}
+
+// ─── Break Lock Modal ───
+.pennilock-break-header {
+  border-bottom: 1px solid #FEE2E2;
+  padding: 20px 24px;
+  background: $pennilock-danger-light;
+}
+
+.pennilock-break-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #FEE2E2;
+  color: $pennilock-danger;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.pennilock-break-warning {
+  background: $pennilock-danger-light;
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  svg {
+    color: $pennilock-danger;
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  p {
+    font-size: 14px;
+    color: #991B1B;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+.pennilock-penalty-breakdown {
+  background: #FFFFFF;
+  border: 1px solid #F1F5F9;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.pennilock-penalty-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+
+  span { color: #64748B; }
+  strong { color: #1E252F; }
+
+  &.loss {
+    strong { color: $pennilock-danger; }
+  }
+
+  &.total-loss {
+    strong {
+      color: $pennilock-danger;
+      font-size: 16px;
+      font-weight: 800;
+    }
+  }
+
+  &.net {
+    padding-top: 8px;
+    strong {
+      color: $pennilock-accent;
+      font-size: 16px;
+      font-weight: 800;
+    }
+  }
+}
+
+.pennilock-break-input {
+  border-color: #FECACA;
+  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+
+  &:focus {
+    border-color: $pennilock-danger;
+    box-shadow: 0 0 0 2px rgba($pennilock-danger, 0.15);
+  }
+}
+
+.pennilock-break-shield-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: $pennilock-danger-light;
+  color: $pennilock-danger;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+// ─── Empty State ───
+.pennilock-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: #FFFFFF;
+  border-radius: 14px;
+  border: 1px solid #F1F5F9;
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: $pennilock-accent-light;
+    color: $pennilock-accent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+
+  h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1E252F;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 14px;
+    color: #64748B;
+    max-width: 380px;
+    margin: 0 auto 20px;
+    line-height: 1.6;
+  }
+}
+
+// ─── Responsive ───
+@media (max-width: 767.98px) {
+  .pennilock-duration-presets {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .pennilock-countdown-number {
+    font-size: 24px;
+  }
+
+  .pennilock-countdown-unit {
+    min-width: 44px;
+  }
+
+  .pennilock-summary-card .summary-value {
+    font-size: 22px;
+  }
+
+  .pennilock-card-balance .pennilock-locked-value {
+    font-size: 20px;
+  }
+}

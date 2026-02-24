@@ -18,6 +18,30 @@ export const NIGERIAN_BANKS = [
   { code: "232", name: "Sterling Bank" },
 ] as const;
 
+// PenniLock rate tiers — longer locks earn higher rates
+export const PENNILOCK_RATE_TIERS = [
+  { minDays: 30,  maxDays: 59,  rate: 8,  label: "30 days" },
+  { minDays: 60,  maxDays: 89,  rate: 10, label: "60 days" },
+  { minDays: 90,  maxDays: 179, rate: 12, label: "90 days" },
+  { minDays: 180, maxDays: 364, rate: 14, label: "180 days" },
+  { minDays: 365, maxDays: Infinity, rate: 15, label: "365 days" },
+] as const;
+
+export const PENNILOCK_MIN_AMOUNT = 10_000;
+export const PENNILOCK_MIN_DAYS = 30;
+export const PENNILOCK_MAX_DAYS = 730;
+export const PENNILOCK_BREAK_PENALTY_PERCENT = 5;
+export const PENNILOCK_MIN_DAYS_BEFORE_BREAK = 30;
+
+// Installment plan constants
+export const INSTALLMENT_MONTHS_OPTIONS = [6, 12] as const;
+export const INSTALLMENT_DEFAULT_UPFRONT_PERCENT = 40;
+export const INSTALLMENT_MIN_UPFRONT_PERCENT = 20;
+export const INSTALLMENT_MAX_UPFRONT_PERCENT = 60;
+export const INSTALLMENT_DEFAULT_MARKUP_6M = 5;
+export const INSTALLMENT_DEFAULT_MARKUP_12M = 10;
+export const INSTALLMENT_MAX_MARKUP = 50;
+
 export const PUBLIC_ROUTES = [
   "/",
   "/about",
@@ -36,6 +60,7 @@ export const USER_NAV = [
   { label: "My Wallet", href: "/wallet", icon: "wallet" },
   { label: "Savings Plans", href: "/savings", icon: "piggy-bank" },
   { label: "Group Savings", href: "/savings/groups", icon: "people-group" },
+  { label: "Investments", href: "/investments", icon: "chart-line" },
   { label: "Marketplace", href: "/marketplace", icon: "store" },
   { label: "Transactions", href: "/transactions", icon: "list" },
   { label: "Profile & Settings", href: "/profile", icon: "gear" },

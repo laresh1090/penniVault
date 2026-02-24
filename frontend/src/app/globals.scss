@@ -1,33 +1,334 @@
 // PenniVault Global Styles
-// Bootstrap compiled CSS is imported in layout.tsx (before this file)
-// so all Bootstrap classes are already available. Our SCSS layers on top.
+// Template CSS (style.css, landing.css, auth.css, dashboard.css)
+// is imported per route-group layout. This file handles only
+// cross-cutting concerns that aren't in the template.
 
-// 1. Variables (brand colours + CSS custom property overrides)
-@import '../styles/variables';
+// Override template preloader body:fixed
+body {
+  position: static !important;
+}
 
-// 2. Mixins (needed by overrides and base)
-@import '../styles/mixins';
-
-// 3. Bootstrap overrides (CSS-level overrides on top of compiled Bootstrap)
-@import '../styles/bootstrap-overrides';
-
-// 4. Base
-@import '../styles/base';
-
-// 5. Utilities
-@import '../styles/utilities';
-
-// 6. Animations & Skeletons
-@import '../styles/animations';
+// Phase 6: Skeleton loading states
 @import '../styles/skeletons';
 
-// 7. Page-specific
-@import '../styles/marketing';
-@import '../styles/dashboard';
-@import '../styles/auth';
+// Phase 6: CSS animations
+@import '../styles/animations';
 
-// 8. Responsive
-@import '../styles/responsive';
+// Phase 2 — PenniSave styles
+@import '../styles/pennisave';
 
-// 9. Font Awesome
+// Phase 3 — PenniLock styles
+@import '../styles/pennilock';
+
+// TargetSave styles
+@import '../styles/targetsave';
+
+// Phase 4 — Investment page styles
+@import '../styles/investments';
+
+// Installment styles
+@import '../styles/installments';
+
+// Widen auth form container when register page (step indicator) is present
+.pv-auth-form-container:has(.pv-step-indicator) {
+  max-width: 560px;
+}
+
+// Savings plan detail styles (from template inline <style>)
+.progress-circle {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  position: relative;
+}
+.progress-circle-inner {
+  width: 144px;
+  height: 144px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.progress-circle-inner .percent {
+  font-size: 28px;
+  font-weight: 800;
+  color: #EB5310;
+  line-height: 1;
+}
+.progress-circle-inner .label {
+  font-size: 12px;
+  color: #64748B;
+  margin-top: 4px;
+}
+.progress-amounts {
+  text-align: center;
+}
+.progress-amounts .saved {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1E252F;
+}
+.progress-amounts .target {
+  font-size: 13px;
+  color: #64748B;
+}
+
+.dashboard-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748B;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.dashboard-breadcrumb a {
+  color: #EB5310;
+  text-decoration: none;
+  font-weight: 500;
+}
+.dashboard-breadcrumb a:hover {
+  text-decoration: underline;
+}
+.dashboard-breadcrumb .separator {
+  color: #CBD5E1;
+}
+.dashboard-breadcrumb .current {
+  color: #1E252F;
+  font-weight: 600;
+}
+
+.plan-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.plan-header-info .plan-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1E252F;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.plan-header-info .plan-desc {
+  font-size: 14px;
+  color: #64748B;
+  margin: 0;
+}
+.plan-header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.saving-towards-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+.saving-towards-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E252F;
+  margin-bottom: 4px;
+}
+.saving-towards-meta {
+  font-size: 13px;
+  color: #64748B;
+  margin-bottom: 10px;
+}
+.saving-towards-price {
+  font-size: 20px;
+  font-weight: 800;
+  color: #EB5310;
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .plan-header {
+    flex-direction: column;
+  }
+  .plan-header-actions {
+    width: 100%;
+  }
+  .plan-header-actions .quick-action-btn {
+    flex: 1;
+    justify-content: center;
+  }
+  .progress-circle {
+    width: 140px;
+    height: 140px;
+  }
+  .progress-circle-inner {
+    width: 112px;
+    height: 112px;
+  }
+  .progress-circle-inner .percent {
+    font-size: 22px;
+  }
+}
+
+// Profile settings styles (from template inline <style>)
+.profile-photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #EB5310;
+}
+.form-switch-lg .form-check-input {
+  width: 48px;
+  height: 24px;
+  cursor: pointer;
+}
+.form-switch-lg .form-check-input:checked {
+  background-color: #EB5310;
+  border-color: #EB5310;
+}
+.form-switch-lg .form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(235, 83, 16, 0.25);
+  border-color: #EB5310;
+}
+.notification-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid #F1F5F9;
+  gap: 16px;
+}
+.notification-row:last-child {
+  border-bottom: none;
+}
+.notification-info .notif-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1E252F;
+  margin: 0 0 2px;
+}
+.notification-info .notif-desc {
+  font-size: 13px;
+  color: #64748B;
+  margin: 0;
+}
+.notification-toggles {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0;
+}
+.notification-toggles .toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748B;
+  font-weight: 500;
+}
+.danger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.danger-row .danger-info .danger-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1E252F;
+  margin: 0 0 2px;
+}
+.danger-row .danger-info .danger-desc {
+  font-size: 13px;
+  color: #64748B;
+  margin: 0;
+}
+.kyc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.kyc-header .kyc-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E252F;
+  margin: 0 0 4px;
+}
+.kyc-header .kyc-desc {
+  font-size: 13px;
+  color: #64748B;
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .notification-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .notification-toggles {
+    gap: 16px;
+  }
+  .danger-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .profile-photo {
+    width: 90px;
+    height: 90px;
+  }
+}
+
+// Font Awesome (react-fontawesome)
 @import '@fortawesome/fontawesome-svg-core/styles.css';
+
+// Global scrollbar — thin, refined
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+// Dark sidebar scrollbar
+.dashboard-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.dashboard-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.dashboard-sidebar {
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}

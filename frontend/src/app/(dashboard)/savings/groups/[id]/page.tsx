@@ -1,616 +1,285 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faChevronLeft,
-  faUsers,
-  faCheck,
-  faTimes,
-  faCircleCheck,
-  faClockRotateLeft,
+  faPlus,
+  faCalendarDays,
+  faCircle,
+  faArrowUp,
+  faComments,
 } from "@fortawesome/free-solid-svg-icons";
-import DashCard from "@/components/ui/DashCard";
-import StatusBadge from "@/components/ui/StatusBadge";
-import ProgressCircle from "@/components/ui/ProgressCircle";
-import DetailRow from "@/components/ui/DetailRow";
-import { mockGroupSavingsDetail } from "@/data/dashboard";
-import { formatNaira, formatDate, formatRelativeTime } from "@/lib/formatters";
-import { getInitials } from "@/lib/utils";
+import { savingsService } from "@/services/savings.service";
+import type { GroupSavingsDetail } from "@/types/dashboard";
+import { formatNaira } from "@/lib/formatters";
 
 export default function GroupSavingsDetailPage() {
   const params = useParams();
   const groupId = params.id as string;
 
-  const group =
-    mockGroupSavingsDetail.id === groupId ? mockGroupSavingsDetail : null;
+  const [group, setGroup] = useState<GroupSavingsDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (!group) {
+  useEffect(() => {
+    savingsService
+      .getGroupSavingsDetail(groupId)
+      .then(setGroup)
+      .catch(() => setGroup(null))
+      .finally(() => setIsLoading(false));
+  }, [groupId]);
+
+  if (isLoading) {
     return (
-      <div>
-        <Link
-          href="/savings/groups"
-          className="d-inline-flex align-items-center gap-2 mb-4"
-          style={{
-            color: "#EB5310",
-            textDecoration: "none",
-            fontSize: 14,
-            fontWeight: 600,
-          }}
-        >
-          <FontAwesomeIcon icon={faChevronLeft} style={{ fontSize: 12 }} />
-          Back to Group Savings
-        </Link>
-        <div
-          className="card p-5 text-center"
-          style={{ borderRadius: 12, border: "1px solid #E2E8F0" }}
-        >
-          <h4 style={{ color: "#334155", fontWeight: 700 }}>
-            Group not found
-          </h4>
-          <p style={{ color: "#64748B", fontSize: 14 }}>
-            The group savings you are looking for does not exist or has been
-            removed.
-          </p>
-          <Link
-            href="/savings/groups"
-            className="btn btn-sm"
-            style={{
-              backgroundColor: "#EB5310",
-              color: "#fff",
-              borderRadius: 8,
-              fontWeight: 600,
-              display: "inline-block",
-              width: "auto",
-              margin: "0 auto",
-              paddingLeft: 24,
-              paddingRight: 24,
-            }}
-          >
-            View All Groups
-          </Link>
+      <div className="d-flex justify-content-center align-items-center" style={{ padding: "60px 0" }}>
+        <div className="spinner-border" role="status" style={{ color: "#EB5310" }}>
+          <span className="visually-hidden">Loading...</span>
         </div>
       </div>
     );
   }
 
-  const roundProgress = Math.round(
-    (group.currentRound / group.totalRounds) * 100
-  );
-  const paidCount = group.members.filter(
-    (m) => m.hasPaidCurrentRound
-  ).length;
+  if (!group) {
+    return (
+      <div className="dash-card" style={{ textAlign: "center", padding: "60px 20px" }}>
+        <h4 style={{ color: "#334155", fontWeight: 700 }}>Group not found</h4>
+        <p style={{ color: "#64748B", fontSize: 14 }}>
+          The group savings you are looking for does not exist or has been removed.
+        </p>
+        <Link href="/savings/groups" className="quick-action-btn primary">View All Groups</Link>
+      </div>
+    );
+  }
 
-  const statusForBadge = group.status as
-    | "active"
-    | "completed"
-    | "pending"
-    | "paused";
+  const poolTarget = group.contributionAmount * group.totalSlots * group.totalRounds;
+  const collected = group.contributionAmount * group.filledSlots * group.currentRound;
+  const poolProgress = Math.round((collected / poolTarget) * 100);
+  const midpoint = Math.ceil(group.totalRounds / 2);
 
   return (
-    <div>
-      {/* Back Link */}
-      <Link
-        href="/savings/groups"
-        className="d-inline-flex align-items-center gap-2 mb-4"
-        style={{
-          color: "#EB5310",
-          textDecoration: "none",
-          fontSize: 14,
-          fontWeight: 600,
-        }}
-      >
-        <FontAwesomeIcon icon={faChevronLeft} style={{ fontSize: 12 }} />
-        Back to Group Savings
-      </Link>
-
-      {/* Group Header */}
-      <div className="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
-        <div className="d-flex align-items-center gap-3">
-          <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>
+    <>
+      {/* Breadcrumb */}
+      <nav aria-label="breadcrumb" style={{ marginBottom: 20 }}>
+        <ol className="breadcrumb" style={{ background: "none", padding: 0, margin: 0, fontSize: 14 }}>
+          <li className="breadcrumb-item">
+            <Link href="/dashboard" style={{ color: "#EB5310", textDecoration: "none" }}>Dashboard</Link>
+          </li>
+          <li className="breadcrumb-item">
+            <Link href="/savings/groups" style={{ color: "#EB5310", textDecoration: "none" }}>Group Savings</Link>
+          </li>
+          <li className="breadcrumb-item active" aria-current="page" style={{ color: "#64748B" }}>
             {group.name}
-          </h2>
-          <StatusBadge status={statusForBadge} />
-        </div>
-        <div className="d-flex gap-2">
-          <button
-            type="button"
-            className="btn btn-sm btn-outline-danger"
-            style={{ borderRadius: 8, fontSize: 13, fontWeight: 600 }}
-          >
-            Leave Group
-          </button>
+          </li>
+        </ol>
+      </nav>
+
+      {/* Group Header Card */}
+      <div className="dash-card mb-4">
+        <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1E252F", marginBottom: 8 }}>{group.name}</h2>
+            <p style={{ fontSize: 14, color: "#64748B", margin: 0, maxWidth: 600 }}>
+              {group.description}
+            </p>
+          </div>
+          <div className="d-flex gap-2 flex-wrap">
+            <a href="#" className="quick-action-btn primary">
+              <FontAwesomeIcon icon={faPlus} /> Make Contribution
+            </a>
+            <a href="#" className="quick-action-btn secondary">
+              <FontAwesomeIcon icon={faCalendarDays} /> View Schedule
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* Description */}
-      <p
-        style={{
-          fontSize: 14,
-          color: "#64748B",
-          lineHeight: 1.6,
-          marginBottom: 24,
-        }}
-      >
-        {group.description}
-      </p>
-
-      {/* Three-column Layout */}
+      {/* Row: Pool Progress + Group Info */}
       <div className="row g-4 mb-4">
-        {/* Col 1: Progress */}
-        <div className="col-lg-4">
-          <div
-            className="card h-100"
-            style={{ borderRadius: 12, border: "1px solid #E2E8F0" }}
-          >
-            <div className="card-body p-4 d-flex flex-column align-items-center justify-content-center">
-              <ProgressCircle
-                percentage={roundProgress}
-                size={160}
-                strokeWidth={10}
-                color={roundProgress >= 100 ? "#22C55E" : "#EB5310"}
-                label="rounds done"
-              />
-              <div className="text-center mt-3">
-                <p
-                  style={{
-                    fontSize: 20,
-                    fontWeight: 700,
-                    color: "#1E293B",
-                    margin: 0,
-                  }}
-                >
-                  Round {group.currentRound} of {group.totalRounds}
+        {/* Col 1: Pool Progress */}
+        <div className="col-md-8">
+          <div className="dash-card">
+            <div className="card-header">
+              <h3 className="card-title">Pool Progress</h3>
+            </div>
+
+            {/* Amount Summary */}
+            <div className="d-flex justify-content-between align-items-end mb-3">
+              <div>
+                <span style={{ fontSize: 13, color: "#64748B" }}>Total Collected</span>
+                <p style={{ fontSize: 24, fontWeight: 800, color: "#1E252F", margin: 0 }}>
+                  {formatNaira(collected, false)}
                 </p>
-                <p
-                  style={{ fontSize: 13, color: "#64748B", margin: 0 }}
-                >
-                  {paidCount}/{group.filledSlots} members paid this round
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <span style={{ fontSize: 13, color: "#64748B" }}>Target Pool</span>
+                <p style={{ fontSize: 16, fontWeight: 700, color: "#64748B", margin: 0 }}>
+                  {formatNaira(poolTarget, false)}
                 </p>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Col 2: Group Details */}
-        <div className="col-lg-4">
-          <div
-            className="card h-100"
-            style={{ borderRadius: 12, border: "1px solid #E2E8F0" }}
-          >
-            <div className="card-body p-4">
-              <h6
-                style={{
-                  fontSize: 15,
-                  fontWeight: 700,
-                  color: "#1E293B",
-                  marginBottom: 16,
-                }}
-              >
-                Group Details
-              </h6>
-              <div className="d-flex flex-column gap-2">
-                <DetailRow label="Frequency" value={group.frequency} />
-                <DetailRow
-                  label="Contribution"
-                  value={formatNaira(group.contributionAmount, false)}
-                />
-                <DetailRow
-                  label="Pool Size"
-                  value={formatNaira(group.poolSize, false)}
-                />
-                <DetailRow
-                  label="Members"
-                  value={`${group.filledSlots}/${group.totalSlots}`}
-                />
-                <DetailRow
-                  label="Start Date"
-                  value={formatDate(group.startDate)}
-                />
-                <DetailRow
-                  label="Next Payout"
-                  value={formatDate(group.nextPayoutDate)}
-                />
-              </div>
+            {/* Progress Bar */}
+            <div className="savings-progress mb-2" style={{ height: 12 }}>
+              <div className="progress-fill" style={{ width: `${poolProgress}%` }}></div>
             </div>
-          </div>
-        </div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "#EB5310", marginBottom: 24 }}>
+              {poolProgress}% Complete
+            </p>
 
-        {/* Col 3: Current Turn */}
-        <div className="col-lg-4">
-          <div
-            className="card h-100"
-            style={{ borderRadius: 12, border: "1px solid #E2E8F0" }}
-          >
-            <div className="card-body p-4">
-              <h6
-                style={{
-                  fontSize: 15,
-                  fontWeight: 700,
-                  color: "#1E293B",
-                  marginBottom: 16,
-                }}
-              >
-                Current Payout Recipient
-              </h6>
-              {(() => {
-                const currentRecipient = group.members.find(
-                  (m) => m.isCurrentTurn
-                );
-                if (!currentRecipient) return null;
+            {/* Savings Timeline */}
+            <h4 style={{ fontSize: 15, fontWeight: 700, color: "#1E252F", marginBottom: 16 }}>Savings Timeline</h4>
+            <div className="d-flex flex-wrap gap-2 mb-3">
+              {Array.from({ length: group.totalRounds }, (_, i) => {
+                const cycle = i + 1;
+                let className = "cycle-block";
+                if (cycle < group.currentRound) className += " completed";
+                else if (cycle === group.currentRound) className += " current";
+                else if (cycle === midpoint) className += " midpoint";
                 return (
-                  <div className="text-center">
-                    <div
-                      style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: "50%",
-                        background: "#FFF3EE",
-                        color: "#EB5310",
-                        fontSize: 22,
-                        fontWeight: 700,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        margin: "0 auto 12px",
-                      }}
-                    >
-                      {getInitials(currentRecipient.name)}
-                    </div>
-                    <p
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: "#1E293B",
-                        margin: 0,
-                      }}
-                    >
-                      {currentRecipient.name}
-                    </p>
-                    <p
-                      style={{
-                        fontSize: 13,
-                        color: "#64748B",
-                        marginBottom: 12,
-                      }}
-                    >
-                      Position #{currentRecipient.position}
-                    </p>
-                    <div
-                      style={{
-                        background: "#F0FDF4",
-                        borderRadius: 8,
-                        padding: "12px 16px",
-                      }}
-                    >
-                      <p
-                        style={{
-                          fontSize: 12,
-                          color: "#059669",
-                          margin: 0,
-                          fontWeight: 600,
-                        }}
-                      >
-                        Payout Amount
-                      </p>
-                      <p
-                        style={{
-                          fontSize: 20,
-                          fontWeight: 800,
-                          color: "#059669",
-                          margin: 0,
-                        }}
-                      >
-                        {formatNaira(group.poolSize, false)}
-                      </p>
-                      <p
-                        style={{
-                          fontSize: 12,
-                          color: "#64748B",
-                          margin: 0,
-                        }}
-                      >
-                        on {formatDate(group.nextPayoutDate)}
-                      </p>
-                    </div>
-                  </div>
+                  <div key={cycle} className={className}>{cycle}</div>
                 );
-              })()}
+              })}
+            </div>
+
+            {/* Legend */}
+            <div className="d-flex align-items-center gap-4" style={{ fontSize: 12, color: "#64748B" }}>
+              <span>
+                <FontAwesomeIcon icon={faCircle} style={{ color: "#059669", fontSize: 8, marginRight: 4 }} /> Start
+              </span>
+              <span>
+                <FontAwesomeIcon icon={faArrowUp} style={{ color: "#D97706", fontSize: 10, marginRight: 4 }} />
+                <span style={{ color: "#D97706", fontWeight: 600 }}>Midpoint (Turns Begin)</span>
+              </span>
+              <span>
+                <FontAwesomeIcon icon={faCircle} style={{ color: "#94A3B8", fontSize: 8, marginRight: 4 }} /> End
+              </span>
             </div>
           </div>
+        </div>
+
+        {/* Col 2: Group Info */}
+        <div className="col-md-4">
+          <div className="dash-card">
+            <div className="card-header">
+              <h3 className="card-title">Group Info</h3>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Members</span>
+              <span className="detail-value">{group.filledSlots} / {group.totalSlots}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Contribution</span>
+              <span className="detail-value">{formatNaira(group.contributionAmount, false)}/cycle</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Payout Per Turn</span>
+              <span className="detail-value" style={{ color: "#EB5310" }}>
+                {formatNaira(group.poolSize, false)}
+              </span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Current Cycle</span>
+              <span className="detail-value">{group.currentRound} of {group.totalRounds}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Midpoint</span>
+              <span className="detail-value">Cycle {midpoint}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Your Turn</span>
+              <span className="detail-value" style={{ color: "#EB5310", fontWeight: 700 }}>
+                Position #{group.members.find((m) => m.isCurrentTurn)?.position ?? "—"}
+              </span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Your Status</span>
+              <span className="detail-value" style={{ color: "#059669" }}>Up to date</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Turn Order Table */}
+      <div className="dash-card mb-4">
+        <div className="card-header">
+          <h3 className="card-title">Turn Order</h3>
+        </div>
+        <div className="table-responsive">
+          <table className="dash-table">
+            <thead>
+              <tr>
+                <th>Turn</th>
+                <th>Member</th>
+                <th>Expected Cycle</th>
+                <th>Payout Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {group.currentRound < midpoint && (
+                <tr style={{ opacity: 0.6 }}>
+                  <td colSpan={5} style={{ textAlign: "center", fontStyle: "italic", fontSize: 13, color: "#64748B" }}>
+                    Turns begin at Cycle {midpoint} (midpoint). Currently at Cycle {group.currentRound}.
+                  </td>
+                </tr>
+              )}
+              {group.payoutSchedule.slice(0, 4).map((payout) => {
+                const currentUser = group.members.find((m) => m.isCurrentTurn);
+                const isYou = currentUser ? payout.recipientName === currentUser.name : false;
+                return (
+                  <tr key={payout.round} style={isYou ? { background: "#FFF3EE" } : undefined}>
+                    <td><strong>#{payout.round}</strong></td>
+                    <td>{isYou ? <strong>You ({payout.recipientName})</strong> : payout.recipientName}</td>
+                    <td>Cycle {midpoint + payout.round - 1}</td>
+                    <td>{formatNaira(payout.amount, false)}</td>
+                    <td>
+                      {payout.status === "completed" ? (
+                        <span className="status-badge completed">Completed</span>
+                      ) : payout.status === "current" ? (
+                        <span className="status-badge" style={{ background: "#EB5310", color: "#FFFFFF" }}>Your Turn</span>
+                      ) : (
+                        <span className="status-badge pending">Upcoming</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
 
       {/* Members Grid */}
-      <div className="mb-4">
-        <DashCard title={`Members (${group.filledSlots}/${group.totalSlots})`}>
-          <div className="row g-3">
-            {group.members.map((member) => (
-              <div key={member.userId} className="col-md-6 col-lg-3">
-                <div
-                  style={{
-                    padding: 16,
-                    borderRadius: 10,
-                    border: member.isCurrentTurn
-                      ? "2px solid #EB5310"
-                      : "1px solid #E2E8F0",
-                    background: member.isCurrentTurn ? "#FFFBF8" : "#FFFFFF",
-                    textAlign: "center",
-                    position: "relative",
-                  }}
-                >
-                  {member.isCurrentTurn && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: -10,
-                        right: 12,
-                        background: "#EB5310",
-                        color: "#fff",
-                        fontSize: 10,
-                        fontWeight: 700,
-                        padding: "2px 8px",
-                        borderRadius: 10,
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Current Turn
-                    </span>
-                  )}
-                  <div
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: "50%",
-                      background: member.hasPaidCurrentRound
-                        ? "#ECFDF5"
-                        : "#FEF2F2",
-                      color: member.hasPaidCurrentRound
-                        ? "#059669"
-                        : "#EF4444",
-                      fontSize: 14,
-                      fontWeight: 700,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "0 auto 8px",
-                    }}
-                  >
-                    {getInitials(member.name)}
-                  </div>
-                  <p
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: "#1E293B",
-                      margin: 0,
-                    }}
-                  >
-                    {member.name}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: 12,
-                      color: "#94A3B8",
-                      margin: "2px 0 8px",
-                    }}
-                  >
-                    Position #{member.position}
-                  </p>
-                  <div
-                    className="d-flex align-items-center justify-content-center gap-1"
-                    style={{ fontSize: 12 }}
-                  >
-                    <FontAwesomeIcon
-                      icon={
-                        member.hasPaidCurrentRound ? faCheck : faTimes
-                      }
-                      style={{
-                        color: member.hasPaidCurrentRound
-                          ? "#059669"
-                          : "#EF4444",
-                        fontSize: 11,
-                      }}
-                    />
-                    <span
-                      style={{
-                        color: member.hasPaidCurrentRound
-                          ? "#059669"
-                          : "#EF4444",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {member.hasPaidCurrentRound ? "Paid" : "Pending"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </DashCard>
-      </div>
-
-      {/* Payout Schedule */}
-      <div className="mb-4">
-        <DashCard title="Payout Schedule">
-          <div className="table-responsive">
-            <table className="table table-hover mb-0">
-              <thead>
-                <tr style={{ fontSize: 13, color: "#64748B" }}>
-                  <th style={{ fontWeight: 600, border: "none", paddingBottom: 12 }}>Round</th>
-                  <th style={{ fontWeight: 600, border: "none", paddingBottom: 12 }}>Recipient</th>
-                  <th style={{ fontWeight: 600, border: "none", paddingBottom: 12 }}>Date</th>
-                  <th style={{ fontWeight: 600, border: "none", paddingBottom: 12 }}>Amount</th>
-                  <th style={{ fontWeight: 600, border: "none", paddingBottom: 12 }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {group.payoutSchedule.map((payout) => (
-                  <tr
-                    key={payout.round}
-                    style={{
-                      fontSize: 14,
-                      background:
-                        payout.status === "current" ? "#FFFBF8" : undefined,
-                    }}
-                  >
-                    <td
-                      style={{
-                        fontWeight: 600,
-                        color: "#1E293B",
-                        borderColor: "#F1F5F9",
-                        padding: "12px 16px",
-                      }}
-                    >
-                      {payout.round}
-                    </td>
-                    <td
-                      style={{
-                        color: "#334155",
-                        borderColor: "#F1F5F9",
-                        padding: "12px 16px",
-                      }}
-                    >
-                      {payout.recipientName}
-                    </td>
-                    <td
-                      style={{
-                        color: "#64748B",
-                        borderColor: "#F1F5F9",
-                        padding: "12px 16px",
-                      }}
-                    >
-                      {formatDate(payout.date)}
-                    </td>
-                    <td
-                      style={{
-                        fontWeight: 600,
-                        color: "#1E293B",
-                        borderColor: "#F1F5F9",
-                        padding: "12px 16px",
-                      }}
-                    >
-                      {formatNaira(payout.amount, false)}
-                    </td>
-                    <td
-                      style={{
-                        borderColor: "#F1F5F9",
-                        padding: "12px 16px",
-                      }}
-                    >
-                      {payout.status === "completed" ? (
-                        <span
-                          className="d-inline-flex align-items-center gap-1"
-                          style={{
-                            background: "#ECFDF5",
-                            color: "#059669",
-                            fontSize: 12,
-                            fontWeight: 600,
-                            padding: "3px 10px",
-                            borderRadius: 12,
-                          }}
-                        >
-                          <FontAwesomeIcon
-                            icon={faCircleCheck}
-                            style={{ fontSize: 11 }}
-                          />
-                          Completed
-                        </span>
-                      ) : payout.status === "current" ? (
-                        <span
-                          style={{
-                            background: "#FFF3EE",
-                            color: "#EB5310",
-                            fontSize: 12,
-                            fontWeight: 600,
-                            padding: "3px 10px",
-                            borderRadius: 12,
-                          }}
-                        >
-                          Current
-                        </span>
-                      ) : (
-                        <span
-                          style={{
-                            background: "#F1F5F9",
-                            color: "#94A3B8",
-                            fontSize: 12,
-                            fontWeight: 600,
-                            padding: "3px 10px",
-                            borderRadius: 12,
-                          }}
-                        >
-                          Upcoming
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </DashCard>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="mb-4">
-        <DashCard title="Recent Activity">
-          {group.recentActivity.map((activity) => (
-            <div
-              key={activity.id}
-              className="d-flex align-items-start gap-3"
-              style={{
-                padding: "12px 0",
-                borderBottom: "1px solid #F1F5F9",
-              }}
-            >
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  background: "#EFF6FF",
-                  color: "#3B82F6",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                {getInitials(activity.memberName)}
-              </div>
-              <div style={{ flex: 1 }}>
-                <p
-                  style={{
-                    fontSize: 13,
-                    color: "#1E293B",
-                    margin: 0,
-                    fontWeight: 500,
-                  }}
-                >
-                  <strong>{activity.memberName}</strong> {activity.action}
-                </p>
-                <p
-                  style={{
-                    fontSize: 12,
-                    color: "#94A3B8",
-                    margin: 0,
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={faClockRotateLeft}
-                    style={{ marginRight: 4, fontSize: 10 }}
-                  />
-                  {formatRelativeTime(activity.timestamp)}
-                </p>
+      <div className="dash-card mb-4">
+        <div className="card-header">
+          <h3 className="card-title">Members</h3>
+        </div>
+        <div className="row g-3">
+          {group.members.slice(0, 4).map((member, i) => (
+            <div key={member.userId} className="col-md-3 col-sm-6">
+              <div className={`member-card${member.isCurrentTurn ? " highlight" : ""}`}>
+                <img src={`/img/member-${i + 1}.jpg`} alt={member.name} className="member-avatar" />
+                <p className="member-name">{member.isCurrentTurn ? "You" : member.name.split(" ")[0] + " " + member.name.split(" ")[1]?.[0] + "."}</p>
+                <span className={`member-status ${member.hasPaidCurrentRound ? "paid" : "overdue"}`}>
+                  {member.hasPaidCurrentRound ? "Paid" : "Overdue"}
+                </span>
               </div>
             </div>
           ))}
-        </DashCard>
+        </div>
       </div>
-    </div>
+
+      {/* Group Discussion Placeholder */}
+      <div className="dash-card">
+        <div className="card-header">
+          <h3 className="card-title">Group Discussion</h3>
+        </div>
+        <div style={{ textAlign: "center", padding: "40px 20px" }}>
+          <FontAwesomeIcon icon={faComments} style={{ fontSize: 48, color: "#E2E8F0", marginBottom: 16, display: "block" }} />
+          <p style={{ fontSize: 14, color: "#94A3B8", margin: 0 }}>Group chat will be available with backend integration</p>
+        </div>
+      </div>
+    </>
   );
 }

@@ -87,10 +87,23 @@ export interface ChartDataPoint {
   value2?: number;
 }
 
+export interface UserDashboardData {
+  totalBalance: number;
+  savingsBreakdown: {
+    pennisave: number;
+    pennilock: number;
+    targetsave: number;
+    penniajo: number;
+  };
+  totalInvested: number;
+  totalReturns: number;
+}
+
 export interface SavingsPlanDetail {
   id: string;
   name: string;
   description: string;
+  productType?: import("./common").SavingsProductType;
   targetAmount: number;
   currentAmount: number;
   startDate: string;

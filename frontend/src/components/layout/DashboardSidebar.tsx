@@ -1,22 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
+import { useWallet } from "@/hooks";
+import { formatNaira } from "@/lib/formatters";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faHome,
+  faHouse,
   faWallet,
   faPiggyBank,
-  faUsers,
+  faPeopleGroup,
   faStore,
-  faExchangeAlt,
-  faCog,
-  faQuestionCircle,
   faList,
+  faGear,
+  faCircleQuestion,
+  faRightFromBracket,
   faPlusCircle,
   faShoppingCart,
   faChartBar,
+  faChartLine,
   faEnvelope,
   faBuilding,
   faLayerGroup,
@@ -24,11 +27,14 @@ import {
   faChartPie,
   faBullhorn,
   faClipboardList,
-  faSignOutAlt,
+  faUsers,
+  faExchangeAlt,
+  faLock,
+  faBullseye,
+  faCalendarCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { useSidebar } from "@/contexts/sidebar-context";
-import { getInitials } from "@/lib/utils";
 
 interface NavItem {
   label: string;
@@ -46,24 +52,33 @@ const USER_NAV: NavSection[] = [
   {
     title: "Main",
     items: [
-      { label: "Dashboard", icon: faHome, href: "/dashboard" },
+      { label: "Dashboard", icon: faHouse, href: "/dashboard" },
+      { label: "My Wallet", icon: faWallet, href: "/wallet" },
     ],
   },
   {
-    title: "Finance",
+    title: "Savings",
     items: [
-      { label: "Wallet", icon: faWallet, href: "/wallet" },
-      { label: "Savings Plans", icon: faPiggyBank, href: "/savings" },
-      { label: "Group Savings", icon: faUsers, href: "/savings/groups" },
+      { label: "PenniSave", icon: faPiggyBank, href: "/savings?type=pennisave" },
+      { label: "PenniLock", icon: faLock, href: "/savings?type=pennilock" },
+      { label: "TargetSave", icon: faBullseye, href: "/savings?type=targetsave" },
+      { label: "PenniAjo", icon: faPeopleGroup, href: "/savings/groups", badge: "2" },
+    ],
+  },
+  {
+    title: "Invest",
+    items: [
+      { label: "Investments", icon: faChartLine, href: "/investments" },
       { label: "Marketplace", icon: faStore, href: "/marketplace" },
-      { label: "Transactions", icon: faExchangeAlt, href: "/transactions" },
+      { label: "Installments", icon: faCalendarCheck, href: "/installments" },
     ],
   },
   {
     title: "Account",
     items: [
-      { label: "Settings", icon: faCog, href: "/profile" },
-      { label: "Help & Support", icon: faQuestionCircle, href: "/help" },
+      { label: "Transactions", icon: faList, href: "/transactions" },
+      { label: "Profile & Settings", icon: faGear, href: "/profile" },
+      { label: "Help & Support", icon: faCircleQuestion, href: "/help" },
     ],
   },
 ];
@@ -72,7 +87,7 @@ const VENDOR_NAV: NavSection[] = [
   {
     title: "Main",
     items: [
-      { label: "Dashboard", icon: faHome, href: "/vendor-dashboard" },
+      { label: "Dashboard", icon: faHouse, href: "/vendor-dashboard" },
     ],
   },
   {
@@ -80,8 +95,8 @@ const VENDOR_NAV: NavSection[] = [
     items: [
       { label: "My Listings", icon: faList, href: "/vendor/listings" },
       { label: "Add Listing", icon: faPlusCircle, href: "/vendor/listings/new" },
-      { label: "Orders", icon: faShoppingCart, href: "/vendor/orders", badge: "3" },
-      { label: "Analytics", icon: faChartBar, href: "/vendor/analytics" },
+      { label: "Investment Ops", icon: faChartLine, href: "/vendor/investments" },
+      { label: "Orders", icon: faShoppingCart, href: "/vendor/orders" },
     ],
   },
   {
@@ -90,7 +105,7 @@ const VENDOR_NAV: NavSection[] = [
       { label: "Wallet", icon: faWallet, href: "/vendor/wallet" },
       { label: "Messages", icon: faEnvelope, href: "/vendor/messages", badge: "5" },
       { label: "Business Profile", icon: faBuilding, href: "/vendor/profile" },
-      { label: "Settings", icon: faCog, href: "/vendor/settings" },
+      { label: "Settings", icon: faGear, href: "/vendor/settings" },
     ],
   },
 ];
@@ -99,7 +114,7 @@ const ADMIN_NAV: NavSection[] = [
   {
     title: "Main",
     items: [
-      { label: "Dashboard", icon: faHome, href: "/admin-dashboard" },
+      { label: "Dashboard", icon: faHouse, href: "/admin-dashboard" },
     ],
   },
   {
@@ -119,7 +134,7 @@ const ADMIN_NAV: NavSection[] = [
       { label: "Reports", icon: faChartPie, href: "/admin/reports" },
       { label: "Announcements", icon: faBullhorn, href: "/admin/announcements" },
       { label: "Audit Log", icon: faClipboardList, href: "/admin/audit" },
-      { label: "Settings", icon: faCog, href: "/admin/settings" },
+      { label: "Settings", icon: faGear, href: "/admin/settings" },
     ],
   },
 ];
@@ -136,111 +151,89 @@ function getNavForRole(role: string | undefined): NavSection[] {
   }
 }
 
-function getRoleBadgeClass(role: string | undefined): string {
-  switch (role) {
-    case "vendor":
-      return "role-vendor";
-    case "admin":
-    case "superadmin":
-      return "role-admin";
-    default:
-      return "role-user";
-  }
-}
-
-function getRoleLabel(role: string | undefined): string {
-  switch (role) {
-    case "vendor":
-      return "Vendor";
-    case "admin":
-      return "Admin";
-    case "superadmin":
-      return "Super Admin";
-    default:
-      return "User";
-  }
-}
-
 export default function DashboardSidebar() {
   const pathname = usePathname();
-  const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
+  const { user, logout } = useAuth();
   const { isOpen, close } = useSidebar();
+  const { wallet, isLoading: walletLoading } = useWallet();
 
-  const role = session?.user?.role;
+  const role = user?.role;
   const navSections = getNavForRole(role);
 
-  const userName =
-    status === "authenticated" && session?.user
-      ? `${session.user.firstName} ${session.user.lastName}`
-      : "Loading...";
-
-  const initials =
-    status === "authenticated" && session?.user
-      ? getInitials(`${session.user.firstName} ${session.user.lastName}`)
-      : "--";
-
   const isActiveLink = (href: string): boolean => {
-    return pathname === href || pathname.startsWith(href + "/");
+    // Parse the href to separate pathname and query params
+    const url = new URL(href, "http://x");
+    const hrefPath = url.pathname;
+    const hrefParams = url.searchParams;
+
+    // If href has query params, require both path and param match
+    if (hrefParams.toString()) {
+      if (pathname !== hrefPath) return false;
+      for (const [key, value] of hrefParams.entries()) {
+        if (searchParams.get(key) !== value) return false;
+      }
+      return true;
+    }
+
+    // Exact match or child route match
+    return pathname === hrefPath || pathname.startsWith(hrefPath + "/");
   };
 
   const handleNavClick = () => {
-    // Close sidebar on mobile after navigation
     close();
   };
 
   const handleLogout = () => {
-    signOut({ callbackUrl: "/login" });
+    logout();
   };
 
+  const isUser = !role || role === "user";
+
   return (
-    <aside className={`dashboard-sidebar${isOpen ? " open" : ""}`}>
+    <aside className={`dashboard-sidebar${isOpen ? " open" : ""}`} id="dashboardSidebar">
+      {/* Logo */}
       <div className="sidebar-logo">
-        <Link href="/dashboard" onClick={handleNavClick}>
-          <span className="logo-penni">Penni</span>
-          <span className="logo-vault">Vault</span>
-        </Link>
+        <h3>Penni<span>Vault</span></h3>
       </div>
 
-      <div className="sidebar-user-info">
-        <div className="user-avatar">{initials}</div>
-        <div className="user-details">
-          <span className="user-name">{userName}</span>
-          <span className={`user-role ${getRoleBadgeClass(role)}`}>
-            {getRoleLabel(role)}
-          </span>
-        </div>
-      </div>
-
+      {/* Navigation */}
       <nav className="sidebar-nav">
         {navSections.map((section) => (
-          <div key={section.title} className="sidebar-nav-section">
-            <span className="sidebar-nav-title">{section.title}</span>
-            <ul>
-              {section.items.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={isActiveLink(item.href) ? "active" : ""}
-                    onClick={handleNavClick}
-                  >
-                    <FontAwesomeIcon icon={item.icon} className="nav-icon" />
-                    <span className="nav-label">{item.label}</span>
-                    {item.badge && (
-                      <span className="nav-badge">{item.badge}</span>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <span key={section.title} style={{ display: "contents" }}>
+            <p className="nav-label">{section.title}</p>
+            {section.items.map((item) => (
+              <span key={item.href} style={{ display: "contents" }}>
+                <Link
+                  href={item.href}
+                  className={`nav-item${isActiveLink(item.href) ? " active" : ""}`}
+                  onClick={handleNavClick}
+                >
+                  <FontAwesomeIcon icon={item.icon} />
+                  <span>{item.label}</span>
+                  {item.badge && <span className="nav-badge">{item.badge}</span>}
+                  {item.href === "/wallet" && isUser && (
+                    <span className="sidebar-wallet-balance">
+                      {walletLoading ? "---" : formatNaira(wallet?.realBalance ?? 0, false)}
+                    </span>
+                  )}
+                </Link>
+              </span>
+            ))}
+          </span>
         ))}
       </nav>
 
+      {/* Sidebar Footer */}
       <div className="sidebar-footer">
-        <button type="button" className="sidebar-logout" onClick={handleLogout}>
-          <FontAwesomeIcon icon={faSignOutAlt} />
+        <a
+          href="#"
+          className="nav-item"
+          onClick={(e) => { e.preventDefault(); handleLogout(); }}
+        >
+          <FontAwesomeIcon icon={faRightFromBracket} />
           <span>Logout</span>
-        </button>
+        </a>
       </div>
     </aside>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import "@/styles/template/style.css";
+import "@/styles/template/dashboard.css";
 import { SidebarProvider } from "@/contexts/sidebar-context";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
 import DashboardTopbar from "@/components/layout/DashboardTopbar";
@@ -12,12 +14,12 @@ export default function VendorLayout({
 }) {
   return (
     <SidebarProvider>
+      <div className="sidebar-overlay"></div>
       <div className="dashboard-wrapper">
         <DashboardSidebar />
-        <SidebarOverlay />
-        <div style={{ flex: 1 }}>
+        <div className="dashboard-main">
           <DashboardTopbar />
-          <main className="dashboard-content">{children}</main>
+          <div className="dashboard-content">{children}</div>
         </div>
       </div>
     </SidebarProvider>

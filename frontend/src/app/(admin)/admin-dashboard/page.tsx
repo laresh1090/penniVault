@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -16,24 +17,48 @@ import {
   faCheck,
   faXmark,
   faEye,
-  faTriangleExclamation,
-  faCircle,
-  faCircleCheck,
   faBell,
 } from "@fortawesome/free-solid-svg-icons";
-
-import {
-  mockAdminRecentUsers,
-  mockVendorApprovals,
-  mockSystemAlerts,
-  mockGrowthChartData,
-  mockSavingsVolumeData,
-} from "@/data/dashboard";
-
+import { adminService } from "@/services/admin.service";
+import type { DashboardStats, AdminTransaction, AdminGroupOverview } from "@/services/admin.service";
+import type { AdminUser, VendorApproval, SystemAlert } from "@/types/dashboard";
 import { formatNaira, formatDate, formatRelativeTime } from "@/lib/formatters";
 
 export default function AdminDashboardPage() {
-  const unresolvedAlerts = mockSystemAlerts.filter((a) => !a.isResolved);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentUsers, setRecentUsers] = useState<AdminUser[]>([]);
+  const [pendingVendors, setPendingVendors] = useState<VendorApproval[]>([]);
+  const [recentTxns, setRecentTxns] = useState<AdminTransaction[]>([]);
+  const [groupOverview, setGroupOverview] = useState<AdminGroupOverview[]>([]);
+  const [alerts, setAlerts] = useState<SystemAlert[]>([]);
+
+  useEffect(() => {
+    adminService.getDashboardStats().then(setStats).catch(() => {});
+    adminService.getRecentUsers(5).then(setRecentUsers).catch(() => {});
+    adminService.getPendingVendors().then(setPendingVendors).catch(() => {});
+    adminService.getRecentTransactions(5).then(setRecentTxns).catch(() => {});
+    adminService.getGroupSavingsOverview().then(setGroupOverview).catch(() => {});
+    adminService.getSystemAlerts().then(setAlerts).catch(() => {});
+  }, []);
+
+  const handleApprove = async (id: string) => {
+    await adminService.approveVendor(id);
+    setPendingVendors((prev) => prev.filter((v) => v.id !== id));
+  };
+
+  const handleReject = async (id: string) => {
+    await adminService.rejectVendor(id);
+    setPendingVendors((prev) => prev.filter((v) => v.id !== id));
+  };
+
+  const unresolvedAlerts = alerts.filter((a) => !a.isResolved);
+
+  const formatCompact = (n: number): string => {
+    if (n >= 1_000_000_000) return `\u20A6${(n / 1_000_000_000).toFixed(1)}B`;
+    if (n >= 1_000_000) return `\u20A6${(n / 1_000_000).toFixed(0)}M`;
+    if (n >= 1_000) return n.toLocaleString();
+    return String(n);
+  };
 
   return (
     <>
@@ -45,7 +70,7 @@ export default function AdminDashboardPage() {
               <FontAwesomeIcon icon={faUsers} />
             </div>
             <p className="kpi-label">Total Users</p>
-            <p className="kpi-value">12,458</p>
+            <p className="kpi-value">{stats ? stats.totalUsers.toLocaleString() : "—"}</p>
             <span className="kpi-trend positive">
               <FontAwesomeIcon icon={faArrowUp} /> 8.2%
             </span>
@@ -57,9 +82,9 @@ export default function AdminDashboardPage() {
               <FontAwesomeIcon icon={faStore} />
             </div>
             <p className="kpi-label">Total Vendors</p>
-            <p className="kpi-value">342</p>
+            <p className="kpi-value">{stats ? stats.totalVendors.toLocaleString() : "—"}</p>
             <span className="kpi-sub">
-              <span style={{ color: "#D97706", fontWeight: 700 }}>4 pending</span> approval
+              <span style={{ color: "#D97706", fontWeight: 700 }}>{stats?.pendingVendors ?? 0} pending</span> approval
             </span>
           </div>
         </div>
@@ -69,7 +94,7 @@ export default function AdminDashboardPage() {
               <FontAwesomeIcon icon={faPiggyBank} />
             </div>
             <p className="kpi-label">Savings Volume</p>
-            <p className="kpi-value">{"\u20A6"}2.8B</p>
+            <p className="kpi-value">{stats ? formatCompact(stats.savingsVolume) : "—"}</p>
             <span className="kpi-trend positive">
               <FontAwesomeIcon icon={faArrowUp} /> 15.4%
             </span>
@@ -81,8 +106,8 @@ export default function AdminDashboardPage() {
               <FontAwesomeIcon icon={faPeopleGroup} />
             </div>
             <p className="kpi-label">Active Groups</p>
-            <p className="kpi-value">89</p>
-            <span className="kpi-sub">1,240 members total</span>
+            <p className="kpi-value">{stats?.activeGroups ?? "—"}</p>
+            <span className="kpi-sub">{stats?.groupMembers?.toLocaleString() ?? "0"} members total</span>
           </div>
         </div>
         <div className="col-xl-2 col-md-4 col-6">
@@ -91,7 +116,7 @@ export default function AdminDashboardPage() {
               <FontAwesomeIcon icon={faArrowRightArrowLeft} />
             </div>
             <p className="kpi-label">Transactions</p>
-            <p className="kpi-value">45,672</p>
+            <p className="kpi-value">{stats ? stats.transactionsThisMonth.toLocaleString() : "—"}</p>
             <span className="kpi-sub">This month</span>
           </div>
         </div>
@@ -101,7 +126,7 @@ export default function AdminDashboardPage() {
               <FontAwesomeIcon icon={faNairaSign} />
             </div>
             <p className="kpi-label">Platform Revenue</p>
-            <p className="kpi-value">{"\u20A6"}42M</p>
+            <p className="kpi-value">{stats ? formatCompact(stats.platformRevenue) : "—"}</p>
             <span className="kpi-trend positive">
               <FontAwesomeIcon icon={faArrowUp} /> 22.1%
             </span>
@@ -180,16 +205,15 @@ export default function AdminDashboardPage() {
           <div className="dash-card">
             <div className="card-header">
               <h3 className="card-title">New Users</h3>
-              <Link href="#" className="card-action">Manage</Link>
+              <Link href="/admin/users" className="card-action">Manage</Link>
             </div>
             <div className="admin-user-list">
-              {mockAdminRecentUsers.map((user) => {
+              {recentUsers.map((user) => {
                 const initials = user.name
                   .split(" ")
                   .map((n) => n[0])
                   .join("")
                   .toUpperCase();
-                const shortName = `${user.name.split(" ")[0]} ${user.name.split(" ")[1]?.[0] || ""}.`.trim();
                 const roleLabel = user.role === "vendor" ? "Vendor" : "Regular User";
                 const statusClass = user.status === "active" ? "active" : "pending";
                 const statusLabel = user.status === "active" ? "Active" : "Pending KYC";
@@ -235,34 +259,40 @@ export default function AdminDashboardPage() {
               <h3 className="card-title" style={{ color: "#D97706" }}>
                 <FontAwesomeIcon icon={faClock} style={{ marginRight: 4 }} /> Pending Approvals
               </h3>
-              <Link href="#" className="card-action">View All</Link>
+              <Link href="/admin/vendors" className="card-action">View All</Link>
             </div>
 
-            {mockVendorApprovals.slice(0, 3).map((vendor) => (
-              <div className="vendor-approval-item" key={vendor.id}>
-                <div className="d-flex justify-content-between align-items-start mb-2">
-                  <div>
-                    <h6 style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>
-                      {vendor.businessName}
-                    </h6>
-                    <span style={{ fontSize: 12, color: "#64748B" }}>
-                      {vendor.category} &middot; Applied {formatDate(vendor.submittedAt)}
-                    </span>
+            {pendingVendors.length === 0 ? (
+              <p style={{ fontSize: 13, color: "#94A3B8", textAlign: "center", padding: "20px 0" }}>
+                No pending vendor approvals
+              </p>
+            ) : (
+              pendingVendors.slice(0, 3).map((vendor) => (
+                <div className="vendor-approval-item" key={vendor.id}>
+                  <div className="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <h6 style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>
+                        {vendor.businessName}
+                      </h6>
+                      <span style={{ fontSize: 12, color: "#64748B" }}>
+                        {vendor.category} &middot; Applied {formatDate(vendor.submittedAt)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="d-flex gap-2">
+                    <button className="btn btn-sm btn-success" style={{ fontSize: 12 }} onClick={() => handleApprove(vendor.id)}>
+                      <FontAwesomeIcon icon={faCheck} /> Approve
+                    </button>
+                    <button className="btn btn-sm btn-outline-danger" style={{ fontSize: 12 }} onClick={() => handleReject(vendor.id)}>
+                      <FontAwesomeIcon icon={faXmark} /> Reject
+                    </button>
+                    <button className="btn btn-sm btn-outline-secondary" style={{ fontSize: 12 }}>
+                      <FontAwesomeIcon icon={faEye} /> Review
+                    </button>
                   </div>
                 </div>
-                <div className="d-flex gap-2">
-                  <button className="btn btn-sm btn-success" style={{ fontSize: 12 }}>
-                    <FontAwesomeIcon icon={faCheck} /> Approve
-                  </button>
-                  <button className="btn btn-sm btn-outline-danger" style={{ fontSize: 12 }}>
-                    <FontAwesomeIcon icon={faXmark} /> Reject
-                  </button>
-                  <button className="btn btn-sm btn-outline-secondary" style={{ fontSize: 12 }}>
-                    <FontAwesomeIcon icon={faEye} /> Review
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -271,7 +301,7 @@ export default function AdminDashboardPage() {
           <div className="dash-card">
             <div className="card-header">
               <h3 className="card-title">Recent Transactions</h3>
-              <Link href="#" className="card-action">Monitor</Link>
+              <Link href="/admin/transactions" className="card-action">Monitor</Link>
             </div>
             <div className="table-responsive">
               <table className="dash-table">
@@ -283,47 +313,19 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td style={{ fontSize: 13 }}>Adebayo M.</td>
-                    <td className="amount-positive" style={{ fontSize: 13 }}>+{"\u20A6"}500K</td>
-                    <td>
-                      <span className="status-badge active" style={{ fontSize: 11 }}>Success</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontSize: 13 }}>Chioma O.</td>
-                    <td className="amount-negative" style={{ fontSize: 13 }}>-{"\u20A6"}200K</td>
-                    <td>
-                      <span className="status-badge active" style={{ fontSize: 11 }}>Success</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontSize: 13 }}>Emeka K.</td>
-                    <td className="amount-positive" style={{ fontSize: 13 }}>+{"\u20A6"}1.2M</td>
-                    <td>
-                      <span className="status-badge pending" style={{ fontSize: 11 }}>Pending</span>
-                    </td>
-                  </tr>
-                  <tr style={{ background: "#FEF2F2" }}>
-                    <td style={{ fontSize: 13 }}>
-                      <FontAwesomeIcon
-                        icon={faTriangleExclamation}
-                        style={{ color: "#DC2626", marginRight: 4 }}
-                      />
-                      Unknown ID
-                    </td>
-                    <td className="amount-negative" style={{ fontSize: 13 }}>-{"\u20A6"}5M</td>
-                    <td>
-                      <span className="status-badge overdue" style={{ fontSize: 11 }}>Flagged</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontSize: 13 }}>Grace A.</td>
-                    <td className="amount-positive" style={{ fontSize: 13 }}>+{"\u20A6"}150K</td>
-                    <td>
-                      <span className="status-badge active" style={{ fontSize: 11 }}>Success</span>
-                    </td>
-                  </tr>
+                  {recentTxns.map((txn) => (
+                    <tr key={txn.id}>
+                      <td style={{ fontSize: 13 }}>{txn.userName}</td>
+                      <td className={txn.amount >= 0 ? "amount-positive" : "amount-negative"} style={{ fontSize: 13 }}>
+                        {txn.amount >= 0 ? "+" : ""}{formatNaira(Math.abs(txn.amount), false)}
+                      </td>
+                      <td>
+                        <span className={`status-badge ${txn.status === "completed" ? "active" : txn.status === "pending" ? "pending" : "overdue"}`} style={{ fontSize: 11 }}>
+                          {txn.status === "completed" ? "Success" : txn.status === "pending" ? "Pending" : "Failed"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -335,7 +337,7 @@ export default function AdminDashboardPage() {
       <div className="dash-card mb-4">
         <div className="card-header">
           <h3 className="card-title">Group Savings Overview</h3>
-          <Link href="#" className="card-action">Manage Groups</Link>
+          <Link href="/admin/groups" className="card-action">Manage Groups</Link>
         </div>
         <div className="table-responsive">
           <table className="dash-table">
@@ -345,64 +347,35 @@ export default function AdminDashboardPage() {
                 <th>Members</th>
                 <th>Total Pool</th>
                 <th>Current Cycle</th>
-                <th>Payout Status</th>
-                <th>Health</th>
-                <th>Created</th>
+                <th>Status</th>
+                <th>Frequency</th>
+                <th>Created By</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><strong>HomeOwners Circle</strong></td>
-                <td>20 / 20</td>
-                <td>{"\u20A6"}50,000,000</td>
-                <td>Cycle 12 of 20</td>
-                <td><span className="status-badge active">Payouts Active</span></td>
-                <td>
-                  <span style={{ color: "#059669", fontWeight: 700 }}>
-                    <FontAwesomeIcon icon={faCircle} style={{ fontSize: 8 }} /> Healthy
-                  </span>
-                </td>
-                <td>Oct 2025</td>
-              </tr>
-              <tr>
-                <td><strong>Car Buyers Club</strong></td>
-                <td>10 / 10</td>
-                <td>{"\u20A6"}20,000,000</td>
-                <td>Cycle 3 of 10</td>
-                <td><span className="status-badge pending">Pre-Midpoint</span></td>
-                <td>
-                  <span style={{ color: "#059669", fontWeight: 700 }}>
-                    <FontAwesomeIcon icon={faCircle} style={{ fontSize: 8 }} /> Healthy
-                  </span>
-                </td>
-                <td>Jan 2026</td>
-              </tr>
-              <tr>
-                <td><strong>Property Investors Pool</strong></td>
-                <td>15 / 15</td>
-                <td>{"\u20A6"}75,000,000</td>
-                <td>Cycle 8 of 15</td>
-                <td><span className="status-badge active">Payouts Active</span></td>
-                <td>
-                  <span style={{ color: "#D97706", fontWeight: 700 }}>
-                    <FontAwesomeIcon icon={faCircle} style={{ fontSize: 8 }} /> At Risk
-                  </span>
-                </td>
-                <td>Aug 2025</td>
-              </tr>
-              <tr>
-                <td><strong>SmartSavers Group A</strong></td>
-                <td>12 / 12</td>
-                <td>{"\u20A6"}12,000,000</td>
-                <td>Completed</td>
-                <td><span className="status-badge completed">All Paid</span></td>
-                <td>
-                  <span style={{ color: "#2563EB", fontWeight: 700 }}>
-                    <FontAwesomeIcon icon={faCircleCheck} style={{ fontSize: 10 }} /> Completed
-                  </span>
-                </td>
-                <td>Mar 2025</td>
-              </tr>
+              {groupOverview.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", color: "#94A3B8", fontSize: 13 }}>
+                    No group savings data available
+                  </td>
+                </tr>
+              ) : (
+                groupOverview.map((g) => (
+                  <tr key={g.id}>
+                    <td><strong>{g.name}</strong></td>
+                    <td>{g.members}</td>
+                    <td>{formatNaira(g.poolSize, false)}</td>
+                    <td>{g.currentRound}</td>
+                    <td>
+                      <span className={`status-badge ${g.status === "active" ? "active" : g.status === "completed" ? "completed" : "pending"}`}>
+                        {g.status.charAt(0).toUpperCase() + g.status.slice(1)}
+                      </span>
+                    </td>
+                    <td>{g.frequency}</td>
+                    <td>{g.createdBy}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

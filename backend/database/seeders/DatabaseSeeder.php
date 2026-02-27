@@ -119,6 +119,9 @@ class DatabaseSeeder extends Seeder
             SavingsSeeder::class,
             MarketplaceSeeder::class,
             InvestmentSeeder::class,
+            InstallmentSeeder::class,
+            GroupSavingsSeeder::class,
+            NotificationSeeder::class,
         ]);
     }
 }

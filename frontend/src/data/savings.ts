@@ -260,6 +260,8 @@ export const mockGroupSavings: GroupSavings[] = [
     startDate: "2025-10-01T00:00:00Z",
     nextPayoutDate: "2026-03-01T00:00:00Z",
     createdAt: "2025-09-15T10:00:00Z",
+    mode: "peer",
+    payoutStartRound: 1,
     members: [
       {
         userId: "usr_001",
@@ -301,6 +303,8 @@ export const mockGroupSavings: GroupSavings[] = [
     startDate: "2025-11-01T00:00:00Z",
     nextPayoutDate: "2026-03-15T00:00:00Z",
     createdAt: "2025-10-20T09:00:00Z",
+    mode: "peer",
+    payoutStartRound: 1,
     members: [
       {
         userId: "usr_001",

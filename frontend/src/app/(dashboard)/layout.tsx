@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import "@/styles/template/style.css";
 import "@/styles/template/dashboard.css";
 import { SidebarProvider } from "@/contexts/sidebar-context";
@@ -13,15 +14,17 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
-      <div className="sidebar-overlay"></div>
-      <div className="dashboard-wrapper">
-        <DashboardSidebar />
-        <div className="dashboard-main">
-          <DashboardTopbar />
-          <div className="dashboard-content">{children}</div>
+    <Suspense>
+      <SidebarProvider>
+        <div className="sidebar-overlay"></div>
+        <div className="dashboard-wrapper">
+          <DashboardSidebar />
+          <div className="dashboard-main">
+            <DashboardTopbar />
+            <div className="dashboard-content">{children}</div>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </Suspense>
   );
 }

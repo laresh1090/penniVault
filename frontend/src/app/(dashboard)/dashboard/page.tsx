@@ -186,7 +186,7 @@ export default function UserDashboardPage() {
       <div className="dash-card mb-4">
         <div className="card-header">
           <h3 className="card-title">My Investments</h3>
-          <Link href="/marketplace/investments" className="card-action">
+          <Link href="/investments" className="card-action">
             View All
           </Link>
         </div>
@@ -198,7 +198,7 @@ export default function UserDashboardPage() {
           </div>
         ) : userInvestments.length === 0 ? (
           <p style={{ color: "#94A3B8", fontSize: 14, textAlign: "center", padding: 32 }}>
-            You haven&apos;t made any investments yet. <Link href="/marketplace/investments" style={{ color: "#EB5310" }}>Browse opportunities</Link>.
+            You haven&apos;t made any investments yet. <Link href="/investments" style={{ color: "#EB5310" }}>Browse opportunities</Link>.
           </p>
         ) : (
           <div className="row g-3">

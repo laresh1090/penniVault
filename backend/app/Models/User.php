@@ -97,6 +97,23 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Order::class, 'vendor_id');
     }
 
+    // -- Group Savings relationships --
+
+    public function groupMemberships(): HasMany
+    {
+        return $this->hasMany(GroupMember::class);
+    }
+
+    public function createdGroups(): HasMany
+    {
+        return $this->hasMany(GroupSavings::class, 'created_by_id');
+    }
+
+    public function vendorAjoGroups(): HasMany
+    {
+        return $this->hasMany(GroupSavings::class, 'vendor_id');
+    }
+
     // -- Investment relationships --
 
     public function crowdInvestments(): HasMany

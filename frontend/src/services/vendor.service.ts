@@ -10,6 +10,7 @@ import type {
   CrowdInvestment,
   InvestmentFilters,
   PaginatedResponse,
+  GroupSavings,
 } from "@/types";
 
 const delay = (ms = 300) => new Promise<void>((r) => setTimeout(r, ms));
@@ -271,5 +272,42 @@ export const vendorService = {
     const qs = buildParams({ ...(filters || {}) });
     const { data } = await api.get(`/vendor/sales${qs}`);
     return { data: data.data as Order[], meta: data.meta };
+  },
+
+  // ── Vendor Ajo ──
+
+  async createVendorAjo(payload: {
+    listingId: string;
+    name?: string;
+    description?: string;
+    frequency: string;
+    totalSlots: number;
+    startDate?: string;
+    payoutStartPercent?: number;
+  }): Promise<GroupSavings> {
+    if (useMockData()) {
+      await delay(500);
+      throw new Error("Mock create not supported");
+    }
+    await csrf();
+    const { data } = await api.post("/vendor/ajo", {
+      listing_id: payload.listingId,
+      name: payload.name,
+      description: payload.description,
+      frequency: payload.frequency,
+      total_slots: payload.totalSlots,
+      start_date: payload.startDate,
+      payout_start_percent: payload.payoutStartPercent,
+    });
+    return data.data as GroupSavings;
+  },
+
+  async getMyVendorAjoGroups(): Promise<GroupSavings[]> {
+    if (useMockData()) {
+      await delay();
+      return [];
+    }
+    const { data } = await api.get("/vendor/ajo");
+    return data.data as GroupSavings[];
   },
 };

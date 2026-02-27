@@ -447,6 +447,8 @@ export const mockGroupSavingsDetail: GroupSavingsDetail = {
   status: "active",
   startDate: "2025-11-01",
   nextPayoutDate: "2026-03-01",
+  mode: "peer",
+  payoutStartRound: 1,
   members: [
     {
       userId: "usr_201",

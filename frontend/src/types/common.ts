@@ -18,6 +18,7 @@ export type TransactionStatus = "completed" | "pending" | "failed";
 export type SavingsFrequency = "daily" | "weekly" | "biweekly" | "monthly";
 export type SavingsStatus = "active" | "completed" | "paused" | "cancelled";
 export type GroupSavingsStatus = "active" | "completed" | "pending" | "cancelled";
+export type GroupSavingsMode = "peer" | "vendor";
 export type AssetCategory = "property" | "automotive" | "lifestyle";
 export type AssetStatus = "available" | "reserved" | "sold";
 export type NotificationType =

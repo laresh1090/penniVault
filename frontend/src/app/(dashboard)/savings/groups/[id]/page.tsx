@@ -21,14 +21,36 @@ export default function GroupSavingsDetailPage() {
 
   const [group, setGroup] = useState<GroupSavingsDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [contributing, setContributing] = useState(false);
+  const [contributionMsg, setContributionMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [showSchedule, setShowSchedule] = useState(false);
 
-  useEffect(() => {
+  const loadGroup = () => {
     savingsService
       .getGroupSavingsDetail(groupId)
       .then(setGroup)
       .catch(() => setGroup(null))
       .finally(() => setIsLoading(false));
+  };
+
+  useEffect(() => {
+    loadGroup();
   }, [groupId]);
+
+  const handleContribute = async () => {
+    setContributing(true);
+    setContributionMsg(null);
+    try {
+      await savingsService.contributeToGroup(groupId);
+      setContributionMsg({ type: "success", text: "Contribution made successfully!" });
+      loadGroup();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Failed to make contribution.";
+      setContributionMsg({ type: "error", text: msg });
+    } finally {
+      setContributing(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -55,7 +77,7 @@ export default function GroupSavingsDetailPage() {
   const poolTarget = group.contributionAmount * group.totalSlots * group.totalRounds;
   const collected = group.contributionAmount * group.filledSlots * group.currentRound;
   const poolProgress = Math.round((collected / poolTarget) * 100);
-  const midpoint = Math.ceil(group.totalRounds / 2);
+  const payoutStartRound = group.payoutStartRound;
 
   return (
     <>
@@ -78,21 +100,80 @@ export default function GroupSavingsDetailPage() {
       <div className="dash-card mb-4">
         <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
           <div>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1E252F", marginBottom: 8 }}>{group.name}</h2>
+            <div className="d-flex align-items-center gap-2 mb-1">
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1E252F", margin: 0 }}>{group.name}</h2>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  padding: "2px 8px",
+                  borderRadius: 4,
+                  background: group.mode === "vendor" ? "#EDE9FE" : "#E0F2FE",
+                  color: group.mode === "vendor" ? "#7C3AED" : "#0284C7",
+                }}
+              >
+                {group.mode === "vendor" ? "Vendor Ajo" : "Peer Ajo"}
+              </span>
+            </div>
             <p style={{ fontSize: 14, color: "#64748B", margin: 0, maxWidth: 600 }}>
               {group.description}
             </p>
           </div>
           <div className="d-flex gap-2 flex-wrap">
-            <a href="#" className="quick-action-btn primary">
-              <FontAwesomeIcon icon={faPlus} /> Make Contribution
-            </a>
-            <a href="#" className="quick-action-btn secondary">
-              <FontAwesomeIcon icon={faCalendarDays} /> View Schedule
-            </a>
+            <button
+              className="quick-action-btn primary"
+              onClick={handleContribute}
+              disabled={contributing || group.status !== "active"}
+            >
+              {contributing ? (
+                <><span className="spinner-border spinner-border-sm me-1" /> Contributing...</>
+              ) : (
+                <><FontAwesomeIcon icon={faPlus} /> Make Contribution</>
+              )}
+            </button>
+            <button
+              className="quick-action-btn secondary"
+              onClick={() => setShowSchedule(!showSchedule)}
+            >
+              <FontAwesomeIcon icon={faCalendarDays} /> {showSchedule ? "Hide Schedule" : "View Schedule"}
+            </button>
           </div>
         </div>
       </div>
+
+      {contributionMsg && (
+        <div className={`alert alert-${contributionMsg.type === "success" ? "success" : "danger"} py-2 mb-4`} style={{ fontSize: 13 }}>
+          {contributionMsg.text}
+        </div>
+      )}
+
+      {/* Vendor Product Card */}
+      {group.mode === "vendor" && group.listing && (
+        <div className="dash-card mb-4">
+          <div className="d-flex align-items-center gap-3">
+            {group.listing.primaryImage && (
+              <img
+                src={group.listing.primaryImage}
+                alt={group.listing.title}
+                style={{ width: 64, height: 64, borderRadius: 8, objectFit: "cover" }}
+              />
+            )}
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: 11, color: "#7C3AED", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                Linked Product
+              </span>
+              <h4 style={{ fontSize: 16, fontWeight: 700, color: "#1E252F", margin: "4px 0" }}>
+                {group.listing.title}
+              </h4>
+              <div className="d-flex align-items-center gap-3" style={{ fontSize: 13 }}>
+                <span style={{ color: "#EB5310", fontWeight: 700 }}>{formatNaira(group.listing.price, false)}</span>
+                <span style={{ color: "#94A3B8" }}>{group.listing.category}</span>
+                {group.vendor && <span style={{ color: "#64748B" }}>by {group.vendor.name}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Row: Pool Progress + Group Info */}
       <div className="row g-4 mb-4">
@@ -135,7 +216,7 @@ export default function GroupSavingsDetailPage() {
                 let className = "cycle-block";
                 if (cycle < group.currentRound) className += " completed";
                 else if (cycle === group.currentRound) className += " current";
-                else if (cycle === midpoint) className += " midpoint";
+                else if (cycle === payoutStartRound) className += " midpoint";
                 return (
                   <div key={cycle} className={className}>{cycle}</div>
                 );
@@ -149,7 +230,9 @@ export default function GroupSavingsDetailPage() {
               </span>
               <span>
                 <FontAwesomeIcon icon={faArrowUp} style={{ color: "#D97706", fontSize: 10, marginRight: 4 }} />
-                <span style={{ color: "#D97706", fontWeight: 600 }}>Midpoint (Turns Begin)</span>
+                <span style={{ color: "#D97706", fontWeight: 600 }}>
+                  Turns Begin (Cycle {payoutStartRound})
+                </span>
               </span>
               <span>
                 <FontAwesomeIcon icon={faCircle} style={{ color: "#94A3B8", fontSize: 8, marginRight: 4 }} /> End
@@ -183,9 +266,15 @@ export default function GroupSavingsDetailPage() {
               <span className="detail-value">{group.currentRound} of {group.totalRounds}</span>
             </div>
             <div className="detail-row">
-              <span className="detail-label">Midpoint</span>
-              <span className="detail-value">Cycle {midpoint}</span>
+              <span className="detail-label">Turns Begin</span>
+              <span className="detail-value">Cycle {payoutStartRound}</span>
             </div>
+            {group.mode === "vendor" && group.productPrice && (
+              <div className="detail-row">
+                <span className="detail-label">Product Price</span>
+                <span className="detail-value">{formatNaira(group.productPrice, false)}</span>
+              </div>
+            )}
             <div className="detail-row">
               <span className="detail-label">Your Turn</span>
               <span className="detail-value" style={{ color: "#EB5310", fontWeight: 700 }}>
@@ -213,26 +302,38 @@ export default function GroupSavingsDetailPage() {
                 <th>Member</th>
                 <th>Expected Cycle</th>
                 <th>Payout Amount</th>
+                {group.mode === "vendor" && (
+                  <>
+                    <th>Real Wallet</th>
+                    <th>Virtual Wallet</th>
+                  </>
+                )}
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {group.currentRound < midpoint && (
+              {group.currentRound < payoutStartRound && (
                 <tr style={{ opacity: 0.6 }}>
-                  <td colSpan={5} style={{ textAlign: "center", fontStyle: "italic", fontSize: 13, color: "#64748B" }}>
-                    Turns begin at Cycle {midpoint} (midpoint). Currently at Cycle {group.currentRound}.
+                  <td colSpan={group.mode === "vendor" ? 7 : 5} style={{ textAlign: "center", fontStyle: "italic", fontSize: 13, color: "#64748B" }}>
+                    Turns begin at Cycle {payoutStartRound}. Currently at Cycle {group.currentRound}.
                   </td>
                 </tr>
               )}
-              {group.payoutSchedule.slice(0, 4).map((payout) => {
+              {(showSchedule ? group.payoutSchedule : group.payoutSchedule.slice(0, 4)).map((payout) => {
                 const currentUser = group.members.find((m) => m.isCurrentTurn);
                 const isYou = currentUser ? payout.recipientName === currentUser.name : false;
                 return (
                   <tr key={payout.round} style={isYou ? { background: "#FFF3EE" } : undefined}>
                     <td><strong>#{payout.round}</strong></td>
                     <td>{isYou ? <strong>You ({payout.recipientName})</strong> : payout.recipientName}</td>
-                    <td>Cycle {midpoint + payout.round - 1}</td>
+                    <td>Cycle {payoutStartRound + payout.round - 1}</td>
                     <td>{formatNaira(payout.amount, false)}</td>
+                    {group.mode === "vendor" && (
+                      <>
+                        <td style={{ color: "#059669" }}>{formatNaira(payout.realAmount ?? payout.amount, false)}</td>
+                        <td style={{ color: "#7C3AED" }}>{formatNaira(payout.virtualAmount ?? 0, false)}</td>
+                      </>
+                    )}
                     <td>
                       {payout.status === "completed" ? (
                         <span className="status-badge completed">Completed</span>
@@ -277,7 +378,7 @@ export default function GroupSavingsDetailPage() {
         </div>
         <div style={{ textAlign: "center", padding: "40px 20px" }}>
           <FontAwesomeIcon icon={faComments} style={{ fontSize: 48, color: "#E2E8F0", marginBottom: 16, display: "block" }} />
-          <p style={{ fontSize: 14, color: "#94A3B8", margin: 0 }}>Group chat will be available with backend integration</p>
+          <p style={{ fontSize: 14, color: "#94A3B8", margin: 0 }}>Group chat coming soon</p>
         </div>
       </div>
     </>

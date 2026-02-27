@@ -8,6 +8,9 @@ use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\SavingsPlanController;
 use App\Http\Controllers\Api\V1\InstallmentController;
+use App\Http\Controllers\Api\V1\AdminController;
+use App\Http\Controllers\Api\V1\GroupSavingsController;
+use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\WalletController;
 use Illuminate\Support\Facades\Route;
 
@@ -63,6 +66,19 @@ Route::prefix('v1')->group(function () {
         Route::post('/savings-plans/{savingsPlan}/resume', [SavingsPlanController::class, 'resume']);
         Route::post('/savings-plans/{savingsPlan}/cancel', [SavingsPlanController::class, 'cancel']);
 
+        // ── Group Savings (PenniAjo) ──
+        Route::get('/group-savings', [GroupSavingsController::class, 'index']);
+        Route::get('/group-savings/mine', [GroupSavingsController::class, 'mine']);
+        Route::post('/group-savings', [GroupSavingsController::class, 'store']);
+        Route::get('/group-savings/{groupSaving}', [GroupSavingsController::class, 'show']);
+        Route::post('/group-savings/{groupSaving}/join', [GroupSavingsController::class, 'join']);
+        Route::post('/group-savings/{groupSaving}/contribute', [GroupSavingsController::class, 'contribute']);
+        Route::post('/group-savings/{groupSaving}/activate', [GroupSavingsController::class, 'activate']);
+
+        // ── Vendor Ajo Management ──
+        Route::post('/vendor/ajo', [GroupSavingsController::class, 'storeVendorAjo']);
+        Route::get('/vendor/ajo', [GroupSavingsController::class, 'vendorGroups']);
+
         // ── Marketplace — Vendor CRUD ──
         Route::post('/listings', [ListingController::class, 'store']);
         Route::put('/listings/{listing}', [ListingController::class, 'update']);
@@ -99,7 +115,39 @@ Route::prefix('v1')->group(function () {
         Route::get('/my-investments', [InvestmentController::class, 'myInvestments']);
         Route::get('/my-investments/{userInvestment}', [InvestmentController::class, 'myInvestmentShow']);
 
-        // ── Admin — Investment Maturation ──
-        Route::post('/admin/investments/{investment}/mature', [InvestmentController::class, 'mature']);
+        // ── Notifications ──
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::put('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+        Route::put('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+
+        // ── Admin ──
+        Route::middleware('admin')->prefix('admin')->group(function () {
+            Route::get('/dashboard/stats', [AdminController::class, 'dashboardStats']);
+            Route::get('/recent-users', [AdminController::class, 'recentUsers']);
+            Route::get('/recent-transactions', [AdminController::class, 'recentTransactions']);
+            Route::get('/group-savings-overview', [AdminController::class, 'groupSavingsOverview']);
+
+            // User management
+            Route::get('/users', [AdminController::class, 'users']);
+            Route::put('/users/{user}', [AdminController::class, 'updateUser']);
+
+            // Vendor management
+            Route::get('/vendors/pending', [AdminController::class, 'pendingVendors']);
+            Route::post('/vendors/{vendorProfile}/approve', [AdminController::class, 'approveVendor']);
+            Route::post('/vendors/{vendorProfile}/reject', [AdminController::class, 'rejectVendor']);
+
+            // Admin views of core data
+            Route::get('/transactions', [AdminController::class, 'transactions']);
+            Route::get('/savings-plans', [AdminController::class, 'savingsPlans']);
+            Route::get('/listings', [AdminController::class, 'listings']);
+
+            // Reports
+            Route::get('/reports/growth', [AdminController::class, 'growthReport']);
+            Route::get('/reports/savings-volume', [AdminController::class, 'savingsVolumeReport']);
+
+            // Investment maturation (existing)
+            Route::post('/investments/{investment}/mature', [InvestmentController::class, 'mature']);
+        });
     });
 });

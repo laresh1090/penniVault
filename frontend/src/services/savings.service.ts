@@ -309,4 +309,66 @@ export const savingsService = {
     const { data } = await api.get<ApiResponse<GroupSavings[]>>("/group-savings/mine");
     return data.data;
   },
+
+  async joinGroup(groupId: string): Promise<void> {
+    if (useMockData()) {
+      await delay();
+      return;
+    }
+    await csrf();
+    await api.post(`/group-savings/${groupId}/join`);
+  },
+
+  async contributeToGroup(groupId: string): Promise<void> {
+    if (useMockData()) {
+      await delay();
+      return;
+    }
+    await csrf();
+    await api.post(`/group-savings/${groupId}/contribute`);
+  },
+
+  async createGroup(payload: {
+    name: string;
+    description?: string;
+    contributionAmount: number;
+    frequency: string;
+    totalSlots: number;
+    startDate?: string;
+    freezePayoutUntilPercent?: number;
+  }): Promise<GroupSavings> {
+    if (useMockData()) {
+      await delay();
+      const newGroup: GroupSavings = {
+        id: `grp_${Date.now()}`,
+        name: payload.name,
+        description: payload.description || "",
+        contributionAmount: payload.contributionAmount,
+        frequency: payload.frequency as GroupSavings["frequency"],
+        totalSlots: payload.totalSlots,
+        filledSlots: 1,
+        currentRound: 0,
+        totalRounds: payload.totalSlots,
+        members: [],
+        status: "pending",
+        startDate: payload.startDate || new Date().toISOString(),
+        nextPayoutDate: "",
+        createdAt: new Date().toISOString(),
+        mode: "peer",
+        payoutStartRound: 1,
+      };
+      return newGroup;
+    }
+    await csrf();
+    const { data } = await api.post("/group-savings", {
+      name: payload.name,
+      description: payload.description,
+      contribution_amount: payload.contributionAmount,
+      frequency: payload.frequency,
+      total_slots: payload.totalSlots,
+      start_date: payload.startDate,
+      freeze_payout_until_percent: payload.freezePayoutUntilPercent,
+    });
+    return data.data as GroupSavings;
+  },
 };

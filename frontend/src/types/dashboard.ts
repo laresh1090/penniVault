@@ -143,6 +143,24 @@ export interface GroupSavingsDetail {
   status: string;
   startDate: string;
   nextPayoutDate: string;
+  mode: import("./common").GroupSavingsMode;
+  payoutStartRound: number;
+  vendorId?: string;
+  listingId?: string;
+  productPrice?: number;
+  payoutStartPercent?: number;
+  freezePayoutUntilPercent?: number;
+  listing?: {
+    id: string;
+    title: string;
+    price: number;
+    category: string;
+    primaryImage: string | null;
+  };
+  vendor?: {
+    id: string;
+    name: string;
+  };
   members: {
     userId: string;
     name: string;
@@ -157,6 +175,8 @@ export interface GroupSavingsDetail {
     recipientName: string;
     date: string;
     amount: number;
+    realAmount?: number;
+    virtualAmount?: number;
     status: "completed" | "upcoming" | "current";
   }[];
   recentActivity: {

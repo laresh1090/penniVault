@@ -277,7 +277,7 @@ export default function MarketplacePage() {
                       disabled={!listing.inStock}
                     >
                       <FontAwesomeIcon icon={faCartShopping} />{" "}
-                      {listing.inStock ? "Buy Now" : "Out of Stock"}
+                      {listing.inStock ? "Buy" : "Out of Stock"}
                     </button>
                     <button
                       className={`quick-action-btn${listing.allowInstallment && listing.inStock ? " installment" : " outline"}`}

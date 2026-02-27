@@ -1,4 +1,4 @@
-import { SavingsFrequency, SavingsStatus, SavingsProductType, GroupSavingsStatus } from "./common";
+import { SavingsFrequency, SavingsStatus, SavingsProductType, GroupSavingsStatus, GroupSavingsMode } from "./common";
 
 export interface SavingsPlan {
   id: string;
@@ -42,6 +42,24 @@ export interface GroupSavings {
   startDate: string;
   nextPayoutDate: string;
   createdAt: string;
+  mode: GroupSavingsMode;
+  payoutStartRound: number;
+  vendorId?: string;
+  listingId?: string;
+  productPrice?: number;
+  payoutStartPercent?: number;
+  freezePayoutUntilPercent?: number;
+  listing?: {
+    id: string;
+    title: string;
+    price: number;
+    category: string;
+    primaryImage: string | null;
+  };
+  vendor?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface GroupMember {

@@ -20,8 +20,6 @@ import {
   faShoppingCart,
   faChartBar,
   faChartLine,
-  faEnvelope,
-  faBuilding,
   faLayerGroup,
   faShoppingBag,
   faChartPie,
@@ -97,15 +95,13 @@ const VENDOR_NAV: NavSection[] = [
       { label: "Add Listing", icon: faPlusCircle, href: "/vendor/listings/new" },
       { label: "Investment Ops", icon: faChartLine, href: "/vendor/investments" },
       { label: "Orders", icon: faShoppingCart, href: "/vendor/orders" },
+      { label: "PenniAjo", icon: faPeopleGroup, href: "/vendor/ajo" },
     ],
   },
   {
     title: "Account",
     items: [
-      { label: "Wallet", icon: faWallet, href: "/vendor/wallet" },
-      { label: "Messages", icon: faEnvelope, href: "/vendor/messages", badge: "5" },
-      { label: "Business Profile", icon: faBuilding, href: "/vendor/profile" },
-      { label: "Settings", icon: faGear, href: "/vendor/settings" },
+      { label: "Profile", icon: faGear, href: "/profile" },
     ],
   },
 ];
@@ -139,6 +135,16 @@ const ADMIN_NAV: NavSection[] = [
   },
 ];
 
+/**
+ * Infer role from the URL path so the correct sidebar shows immediately
+ * on refresh (before the auth API call resolves).
+ */
+function inferRoleFromPath(pathname: string): string | undefined {
+  if (pathname.startsWith("/vendor") || pathname.startsWith("/vendor-dashboard")) return "vendor";
+  if (pathname.startsWith("/admin")) return "admin";
+  return "user";
+}
+
 function getNavForRole(role: string | undefined): NavSection[] {
   switch (role) {
     case "vendor":
@@ -154,12 +160,15 @@ function getNavForRole(role: string | undefined): NavSection[] {
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { user, logout } = useAuth();
+  const { user, isLoading: authLoading, logout } = useAuth();
   const { isOpen, close } = useSidebar();
   const { wallet, isLoading: walletLoading } = useWallet();
 
-  const role = user?.role;
+  // Use the real role once auth resolves; fall back to path-based inference while loading
+  const role = authLoading ? inferRoleFromPath(pathname) : (user?.role ?? inferRoleFromPath(pathname));
   const navSections = getNavForRole(role);
+
+  const allHrefs = navSections.flatMap((s) => s.items.map((i) => new URL(i.href, "http://x").pathname));
 
   const isActiveLink = (href: string): boolean => {
     // Parse the href to separate pathname and query params
@@ -176,8 +185,18 @@ export default function DashboardSidebar() {
       return true;
     }
 
-    // Exact match or child route match
-    return pathname === hrefPath || pathname.startsWith(hrefPath + "/");
+    // Exact match always wins
+    if (pathname === hrefPath) return true;
+
+    // Child route match — but only if no other nav item is a more specific match
+    if (pathname.startsWith(hrefPath + "/")) {
+      const hasMoreSpecific = allHrefs.some(
+        (other) => other !== hrefPath && other.startsWith(hrefPath + "/") && pathname.startsWith(other),
+      );
+      return !hasMoreSpecific;
+    }
+
+    return false;
   };
 
   const handleNavClick = () => {

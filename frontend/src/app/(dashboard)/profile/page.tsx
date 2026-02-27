@@ -4,21 +4,65 @@ import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "@/contexts/auth-context";
+import api, { csrf } from "@/lib/api";
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
 
   // Personal Info form state
-  const [fullName, setFullName] = useState(`${user?.firstName ?? ""} ${user?.lastName ?? ""}`);
-  const [email, setEmail] = useState(user?.email ?? "");
+  const [firstName, setFirstName] = useState(user?.firstName ?? "");
+  const [lastName, setLastName] = useState(user?.lastName ?? "");
+  const [email] = useState(user?.email ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
-  const [dob, setDob] = useState("");
+  const [dob, setDob] = useState(user?.dateOfBirth ?? "");
   const [address, setAddress] = useState(user?.address ?? "");
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Security form state
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handleSaveProfile = async () => {
+    setProfileSaving(true);
+    setProfileMsg(null);
+    try {
+      await csrf();
+      await api.put("/user/profile", { firstName, lastName, phone, dateOfBirth: dob || null, address: address || null });
+      if (refreshUser) await refreshUser();
+      setProfileMsg({ type: "success", text: "Profile updated successfully." });
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Failed to update profile.";
+      setProfileMsg({ type: "error", text: msg });
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      setPasswordMsg({ type: "error", text: "Passwords do not match." });
+      return;
+    }
+    setPasswordSaving(true);
+    setPasswordMsg(null);
+    try {
+      await csrf();
+      await api.put("/user/password", { currentPassword, password: newPassword, password_confirmation: confirmPassword });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordMsg({ type: "success", text: "Password updated successfully." });
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Failed to update password.";
+      setPasswordMsg({ type: "error", text: msg });
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
 
   // Notification toggles
@@ -67,21 +111,35 @@ export default function ProfilePage() {
           <div className="col-md-9">
             <form>
               <div className="row g-3">
-                <div className="col-md-6">
+                <div className="col-md-4">
                   <label
                     className="form-label"
                     style={{ fontSize: 13, fontWeight: 600, color: "#64748B" }}
                   >
-                    Full Name
+                    First Name
                   </label>
                   <input
                     type="text"
                     className="form-control"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
                   />
                 </div>
-                <div className="col-md-6">
+                <div className="col-md-4">
+                  <label
+                    className="form-label"
+                    style={{ fontSize: 13, fontWeight: 600, color: "#64748B" }}
+                  >
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-4">
                   <label
                     className="form-label"
                     style={{ fontSize: 13, fontWeight: 600, color: "#64748B" }}
@@ -92,7 +150,8 @@ export default function ProfilePage() {
                     type="email"
                     className="form-control"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    disabled
+                    style={{ background: "#F8FAFC" }}
                   />
                 </div>
                 <div className="col-md-6">
@@ -138,12 +197,24 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div className="col-12">
+                  {profileMsg && (
+                    <div className={`alert alert-${profileMsg.type === "success" ? "success" : "danger"} py-2`} style={{ fontSize: 13 }}>
+                      {profileMsg.text}
+                    </div>
+                  )}
                   <button
                     type="button"
                     className="btn btn-primary"
                     style={{ background: "#EB5310", borderColor: "#EB5310" }}
+                    onClick={handleSaveProfile}
+                    disabled={profileSaving}
                   >
-                    <FontAwesomeIcon icon={faFloppyDisk} className="me-1" /> Save Changes
+                    {profileSaving ? (
+                      <span className="spinner-border spinner-border-sm me-1" />
+                    ) : (
+                      <FontAwesomeIcon icon={faFloppyDisk} className="me-1" />
+                    )}
+                    {profileSaving ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </div>
@@ -205,8 +276,22 @@ export default function ProfilePage() {
               />
             </div>
           </div>
-          <button type="button" className="btn btn-secondary">
-            Update Password
+          {passwordMsg && (
+            <div className={`alert alert-${passwordMsg.type === "success" ? "success" : "danger"} py-2 mb-3`} style={{ fontSize: 13 }}>
+              {passwordMsg.text}
+            </div>
+          )}
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleUpdatePassword}
+            disabled={passwordSaving || !currentPassword || !newPassword || !confirmPassword}
+          >
+            {passwordSaving ? (
+              <><span className="spinner-border spinner-border-sm me-1" /> Updating...</>
+            ) : (
+              "Update Password"
+            )}
           </button>
         </form>
 

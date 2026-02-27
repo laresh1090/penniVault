@@ -24,6 +24,7 @@ interface AuthContextType {
   verifyEmail: (email: string, code: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
   setUser: (user: User | null) => void;
+  refreshUser: () => Promise<void>;
 }
 
 interface LoginResult {
@@ -265,6 +266,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         verifyEmail,
         resendOtp,
         setUser,
+        refreshUser: fetchUser,
       }}
     >
       {children}

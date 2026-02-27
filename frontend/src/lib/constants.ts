@@ -69,10 +69,10 @@ export const USER_NAV = [
 
 export const VENDOR_NAV = [
   { label: "Dashboard", href: "/vendor-dashboard", icon: "house" },
-  { label: "My Listings", href: "/vendor-dashboard/listings", icon: "clipboard-list" },
-  { label: "Orders", href: "/vendor-dashboard/orders", icon: "shopping-cart" },
-  { label: "Wallet", href: "/wallet", icon: "wallet" },
-  { label: "Transactions", href: "/transactions", icon: "list" },
+  { label: "My Listings", href: "/vendor/listings", icon: "clipboard-list" },
+  { label: "Orders", href: "/vendor/orders", icon: "shopping-cart" },
+  { label: "Investments", href: "/vendor/investments", icon: "chart-line" },
+  { label: "PenniAjo", href: "/vendor/ajo", icon: "people-group" },
   { label: "Profile", href: "/profile", icon: "gear" },
 ];
 

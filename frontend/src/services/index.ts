@@ -9,3 +9,4 @@ export { marketplaceService } from "./marketplace.service";
 export { investmentService } from "./investment.service";
 export { vendorService } from "./vendor.service";
 export { installmentService } from "./installment.service";
+export { adminService } from "./admin.service";
